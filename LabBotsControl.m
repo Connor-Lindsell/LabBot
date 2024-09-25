@@ -2,38 +2,66 @@ classdef LabBotsControl
     
     
     properties
-        steps = 100;
-
+        % steps = 100;
         
     end
 
-    methods (Static)
-        function SimultaneousControl
+    methods
+        function self = LabBotsControl
+            % Constructor method
+            self.SimultaneousControl
+
+        end
+    end 
+
+
+    methods
+        function SimultaneousControl(self)
             % Initaialising Robot Models
             rUR3 = UR3;
-            rLabBot = LabBot;
+            % rLabBot = LabBot;
 
             %% Base transforms
 
+            %% Set Up Enviorment 
+
+            % Call Enviorment class
+
+            % Temorary Enviorment 
+            % Configure the axes and labels for the environment
+            axis([-1.6 1.6 -1 1 0 1.5]);  % Set the axis limits to fit all objects in the environment
+            xlabel('X-axis');  % Label the X-axis
+            ylabel('Y-axis');  % Label the Y-axis
+            zlabel('Z-axis');  % Label the Z-axis
+            grid on;  % Display a grid for better visualization of object positions
+            hold on;  % Keep the plot active for additional elements
+
+
+            %% Plot 
+            rUR3.model.plot(zeros(1, rUR3.model.n));
+            % rLabBot.model.plot(zeros(1, rUR3.model.n));
 
             %% Trasforms
             % UR3 End Effector Goal Destinations 
-            UR3_Start = [0.2,0.2,0.2];
-            UR3_Pos1 = [0.2,0.2,0.2];
-            UR3_End = [0.2,0.2,0.2];
+            UR3_Start = [0.2,0.3,0.2];
+            UR3_Pos1 = [0.3,-0.2,0.1];
+            UR3_End = [-0.2,0.1,0.3];
     
             % LabBot End Effector Goal Destinations 
-            LabBot_Start = [0.2,0.2,0.2];
-            LabBot_Pos1 = [0.2,0.2,0.2];
-            LabBot_End = [0.2,0.2,0.2];
+            % LabBot_Start = [0.2,0.2,0.2];
+            % LabBot_Pos1 = [0.2,0.2,0.2];
+            % LabBot_End = [0.2,0.2,0.2];
 
 
-            %% Movement
-            Move2Global(UR3_Start,UR3_Pos1,rUR3)
-            Move2Global(UR3_Pos1,UR3_End,rUR3)
+            %% Perform Movements
+            % Calling Move2Global using self
+            % For UR3
+            self.Move2Global(UR3_Start, UR3_Pos1, rUR3);
+            self.Move2Global(UR3_Pos1, UR3_End, rUR3);
             
-            Move2Global(LabBot_Start,LabBot_Pos1,rLabBot)
-            Move2Global(LabBot_Pos1,LabBot_End,rLabBot)            
+            % For LabBot
+            % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
+            % self.Move2Global(LabBot_Pos1, LabBot_End, rLabBot);             
             
         end
 
@@ -47,7 +75,8 @@ classdef LabBotsControl
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(start, finish, robot)            
+        function Move2Global(self, start, finish, robot) 
+
             steps = 100;
             
             % Define transforms with a downward orientation for the last joint (pointing down)
