@@ -36,11 +36,7 @@ classdef LabBotsControl
             grid on;  % Display a grid for better visualization of object positions
             hold on;  % Keep the plot active for additional elements
 
-
-            %% Plot 
-            rUR3.model.plot(zeros(1, rUR3.model.n));
-            % rLabBot.model.plot(zeros(1, rUR3.model.n));
-
+            
             %% Trasforms
             % UR3 End Effector Goal Destinations 
             UR3_Start = [0.2,0.3,0.2];
