@@ -4,91 +4,88 @@ classdef LabBotsControl
     properties
         steps = 100;
 
-        % UR3 End Effector Goal Destinations 
-        UR3_Start = [0.2,0.2,0.2]
-        UR3_Pos1 = [0.2,0.2,0.2]
-        UR3_End = [0.2,0.2,0.2]
-
-        % LabBot End Effector Goal Destinations 
-        LabBot_Start = [0.2,0.2,0.2]
-        LabBot_Pos1 = [0.2,0.2,0.2]
-        LabBot_End = [0.2,0.2,0.2]
+        
     end
 
     methods (Static)
-        function SimulataniousControl()
+        function SimultaneousControl
             % Initaialising Robot Models
             rUR3 = UR3;
             rLabBot = LabBot;
 
-            %% Transforms 
-            % UR3 Transforms
-            UR3Transforms = { transl(UR3_Start), ...
-                                transl(UR3_Pos1), ...
-                                transl(UR3_End) ...
-                                };
+            %% Base transforms
 
-            % LabBot Transforms 
-            LabBotTransforms = { transl(UR3_Start), ...
-                                transl(UR3_Pos1), ...
-                                transl(UR3_End) ...
-                                };
-           
-            %% Calculations For q value conversion
-            % Pre-allocate cell array for joint configurations
-            qUR3 = cell(1, length(UR3Transforms));
-            
-            % Loop to convert the transforms to the q values using Inverse Kinematics
-            for i = 1:length(UR3Transforms)   
-                qUR3{i} = rUR3.model.ikine(UR3Transforms{i}, 'mask', [1, 1, 1, 0, 0, 0]);
-                
-                % Print q values for Logging
-                fprintf('q%d = [', i);
-                fprintf(' %.5f', qUR3{i});
-                fprintf(' ]\n');
-            end
 
-            % Pre-allocate cell array for joint configurations
-            qLabBot = cell(1, length(LabBotTransforms));
-            
-            % Loop to convert the transforms to the q values using Inverse Kinematics
-            for i = 1:length(LabBotTransforms)   
-                qLabBot{i} = rLabBot.model.ikine(LabBotTransforms{i}, 'mask', [1, 1, 1, 0, 0, 0]);
-                
-                % Print q values for Logging
-                fprintf('q%d = [', i);
-                fprintf(' %.5f', qLabBot{i});
-                fprintf(' ]\n');
-            end
+            %% Trasforms
+            % UR3 End Effector Goal Destinations 
+            UR3_Start = [0.2,0.2,0.2];
+            UR3_Pos1 = [0.2,0.2,0.2];
+            UR3_End = [0.2,0.2,0.2];
+    
+            % LabBot End Effector Goal Destinations 
+            LabBot_Start = [0.2,0.2,0.2];
+            LabBot_Pos1 = [0.2,0.2,0.2];
+            LabBot_End = [0.2,0.2,0.2];
 
-            %% Generate Joint Trajectories
-            % Pre-allocate matrix for combined joint trajectory
-            qMatrixUR3Total = [];
-            
-            % Generate joint space trajectories for each consecutive pair of transformations
-            for i = 1:(length(qUR3) - 1)
-                qMatrixUR3 = jtraj(qUR3{i}, qUR3{i + 1}, steps);
-                qMatrixUR3Total = [qMatrixUR3Total; qMatrixUR3];  
-            end
 
-            % Pre-allocate matrix for combined joint trajectory
-            qMatrixLabBotTotal = [];
+            %% Movement
+            Move2Global(UR3_Start,UR3_Pos1,rUR3)
+            Move2Global(UR3_Pos1,UR3_End,rUR3)
             
-            % Generate joint space trajectories for each consecutive pair of transformations
-            for i = 1:(length(qLabBot) - 1)
-                qMatrixLabBot = jtraj(qLabBot{i}, qLabBot{i + 1}, steps);
-                qMatrixLabBotTotal = [qMatrixLabBotTotal; qMatrixLabBot];  
-            end
-        
-            %% Animate Movement 
-            % Animate the robot through the combined trajectory
-            for i = 1:size(qMatrixUR3Total, 1)
-                rUR3.model.animate(qMatrixUR3Total(i, :));
-                rLabBot.model.animate(qMatrixLabBotTotal(i, :));
-                drawnow();
-            end
+            Move2Global(LabBot_Start,LabBot_Pos1,rLabBot)
+            Move2Global(LabBot_Pos1,LabBot_End,rLabBot)            
             
         end
+
+        %% Move To Global Function
+        % Moves the selected Robot Arm From a Start Position to  Finish
+        % Position
+        % 
+        % Inputs - 
+        % Start Transform: the start lcation of the robot end effector 
+        % Finish Transform: the end location of the robot end effector 
+        % Robot: calls the robot that is required to move
+        
+
+        function Move2Global(start, finish, robot)            
+            steps = 100;
+            
+            % Define transforms with a downward orientation for the last joint (pointing down)
+            transforms = {transl(start), transl(finish)};
+            
+            % Pre-allocate cell array for joint configurations
+            q = cell(1, length(transforms));
+            
+            % Solve inverse kinematics for each transformation
+            for i = 1:length(transforms)
+                % Use a mask that includes Z position and orientation (roll around X-axis)
+                q{i} = robot.model.ikine(transforms{i}, 'mask', [1, 1, 1, 0, 0, 0]);
+                
+                % Display the full joint angles using fprintf
+                fprintf('q%d = [', i);
+                fprintf(' %.5f', q{i});  % Display all joint angles in a row
+                fprintf(' ]\n');
+            end
+        
+            
+            % Pre-allocate matrix for combined joint trajectory
+            qMatrixTotal = [];
+            
+            % Generate joint space trajectories for each consecutive pair of transformations
+            for i = 1:(length(q) - 1)
+                qMatrix = jtraj(q{i}, q{i + 1}, steps);
+                qMatrixTotal = [qMatrixTotal; qMatrix];  
+            end
+        
+            % Animate the robot through the combined trajectory
+            for i = 1:size(qMatrixTotal, 1)
+                robot.model.animate(qMatrixTotal(i, :));
+                drawnow();
+            end
+            hold on
+        
+        end
+
 
         %% Grab Chemical Function 
         % Toggled by GUI Button
