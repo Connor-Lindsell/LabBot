@@ -89,6 +89,34 @@ classdef LabBotsControl
             end
             
         end
+
+        %% Grab Chemical Function 
+        % Toggled by GUI Button
+
+        % function grabChemical = ChooseChemical(TestTube,Chemical)
+        %     % get pos of chemical 
+        % 
+        %     % move to chemical 
+        % 
+        %     % grab chemical 
+        % 
+        %     % move to densition (test tub holder) 
+        % 
+        %     % place chemical
+        % 
+        % end 
+
+        %% Move To End Effector Position 
+        % Toggled by GUI Button 
+
+        % function move2EndEffector = ManualMovement_Endeffector (Startpos, Endpos)
+        %     % get pos of robotic arm
+        % 
+        %     % move to pos
+        % 
+        % end 
+
+        
        
     end
 
