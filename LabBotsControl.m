@@ -58,8 +58,91 @@ classdef LabBotsControl
             % For LabBot
             % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
             % self.Move2Global(LabBot_Pos1, LabBot_End, rLabBot);             
+
+            %% Mix Chemicals 
+
+            % Define chemicals to mix and their test tube locations
+            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
+                              {'Iodine', 2}, ... 
+                              {'Nitrogen', 4} ...
+                              };
             
+            % Call MixChem with 3 chemicals and mixing location 3
+            MixChem(self, 3, chemicals2mix1, 3)
+            
+            chemicals2mix2 = {{'New Mixture', 3}, ... 
+                              {'Nitrogen', 4} ...
+                              };
+            
+            % Call MixChem with 2 chemicals and mixing location 5
+            MixChem(self, 2, chemicals2mix2, 5)
+                    
         end
+
+        %% Mix Chemical Function 
+        % Selects Chemicals and then mixes the chemicals by pouring them
+        % together
+        % 
+        % Inputs - 
+        % numOfChem: The number of chemicals to be mixed 
+        % chem2mix: The chemicals to be mixed and the corresponding test 
+        %           tube which it is stored, which are stored in an array 
+        %           of pairs eg. {'Bromine', 1}
+        % mixingLocation: Where the chemicals are to be mixed
+                
+
+        function MixChem(self, numOfChem, chem2mix, mixingLocation)
+            % Define test tube locations (you could adjust this as per your environment)
+            testTubeLocation = {[0.2, 0.21, 0.2], ...
+                                [0.2, 0.22, 0.2], ...
+                                [0.2, 0.23, 0.2], ...
+                                [0.2, 0.24, 0.2], ...
+                                [0.2, 0.25, 0.2]};
+                            
+            % Iterate over the number of chemicals to mix
+            for i = 1:numOfChem
+                %% Retrieve Chem
+                % Extract chemical name and its location from chemicals2mix array
+                chemical = chem2mix{i}{1};  % Name of the chemical
+                locationIndex = chem2mix{i}{2};  % Index of the test tube location
+                fprintf('Picking up %s from test tube %d...\n', chemical, locationIndex);
+                
+                % Move to the test tube location to pick up the chemical
+                startPos = self.getEndEffectorPos; 
+                finishPos = testTubeLocation{locationIndex};  % Test tube location
+                
+                % Move UR3 to the test tube
+                self.Move2Global(startPos, finishPos, rUR3);
+                
+                % self.GripperClose();
+                fprintf('Gripper closing to pick up %s...\n', chemical);
+                
+                % Move to the mixing location
+                startPos = finishPos;
+                finishPos = testTubeLocation{mixingLocation};  % Mixing location 
+                fprintf('Moving %s to the mixing location at test tube %d...\n', chemical, mixingLocation);
+                
+                % Move robot to the mixing location with the chemical
+                self.Move2Global(startPos, finishPos, rUR3);
+                
+                %% Mix Chem
+                % self.PourChem(); 
+                fprintf('Pouring %s into test tube at the mixing location...\n', chemical);
+                
+                %% Return Chem
+                % Move back to the original test tube location to return the tube
+                startPos = finishPos;
+                finishPos = testTubeLocation{locationIndex};  % Back to the original location
+                fprintf('Returning test tube %d to its original position...\n', locationIndex);
+                
+                % Move robot back to return the test tube
+                self.Move2Global(startPos, finishPos, rUR3);
+                
+                % self.GripperOpen(); 
+                fprintf('Gripper opening to release test tube %d...\n', locationIndex);
+            end
+        end
+
 
         %% Move To Global Function
         % Moves the selected Robot Arm From a Start Position to  Finish
@@ -71,12 +154,12 @@ classdef LabBotsControl
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(self, start, finish, robot) 
+        function Move2Global(self, startTr, finishTr, robot) 
 
             steps = 100;
             
             % Define transforms with a downward orientation for the last joint (pointing down)
-            transforms = {transl(start), transl(finish)};
+            transforms = {transl(startTr), transl(finishTr)};
             
             % Pre-allocate cell array for joint configurations
             q = cell(1, length(transforms));
