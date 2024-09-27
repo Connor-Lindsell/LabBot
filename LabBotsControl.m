@@ -1,20 +1,22 @@
 classdef LabBotsControl
-    
-    
+    %% Properties    
     properties
-        % steps = 100;
         rUR3
+        % rLabBot
+        
+        steps = 100;
+        
     end
 
+    %% Constructor method
     methods
         function self = LabBotsControl
-            % Constructor method
             self.SimultaneousControl
 
         end
     end 
 
-
+    %% Functions
     methods
         function SimultaneousControl(self)
             % Initaialising Robot Models
@@ -27,7 +29,7 @@ classdef LabBotsControl
 
             %% Set Up Enviorment 
 
-            % Call Enviorment class
+            % Call Enviorment class here
 
             % Temorary Enviorment 
             % Configure the axes and labels for the environment
@@ -91,8 +93,7 @@ classdef LabBotsControl
         %           tube which it is stored, which are stored in an array 
         %           of pairs eg. {'Bromine', 1}
         % mixingLocation: Where the chemicals are to be mixed
-                
-
+        
         function MixChem(self, numOfChem, chem2mix, mixingLocation)
             % Define test tube locations (you could adjust this as per your environment)
             testTubeLocation = {[0.2, 0.21, 0.2], ...
@@ -156,10 +157,7 @@ classdef LabBotsControl
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(self, startTr, finishTr, robot) 
-
-            steps = 100;
-            
+        function Move2Global(self, startTr, finishTr, robot)             
             % Define transforms with a downward orientation for the last joint (pointing down)
             transforms = {transl(startTr), transl(finishTr)};
             
@@ -190,7 +188,7 @@ classdef LabBotsControl
                 fprintf('Moving robot to the start position...\n');
             
                 % If the robot is not at the start position, move it there
-                qMatrix = jtraj(robot.getpos(), q{1}, steps);  % Joint trajectory from current position to start position
+                qMatrix = jtraj(robot.model.getpos(), q{1}, self.steps);  % Joint trajectory from current position to start position
                 
                 % Animate the movement to the start position
                 for i = 1:size(qMatrix, 1)
@@ -204,7 +202,7 @@ classdef LabBotsControl
             
             % Generate joint space trajectories for each consecutive pair of transformations
             for i = 1:(length(q) - 1)
-                qMatrix = jtraj(q{i}, q{i + 1}, steps);
+                qMatrix = jtraj(q{i}, q{i + 1}, self.steps);
                 qMatrixTotal = [qMatrixTotal; qMatrix];  
             end
         
@@ -229,10 +227,10 @@ classdef LabBotsControl
 
         function endEffectorPos = getEndEffectorPos(self, robot)
             % Get the current joint positions of the robot
-            qCurrent = robot.getpos();
+            qCurrent = robot.model.getpos();
         
             % Calculate the transformation matrix for the end-effector
-            T = robot.fkine(qCurrent);
+            T = robot.model.fkine(qCurrent);
         
             % Extract the position of the end-effector (X, Y, Z)
             endEffectorPos = transl(T);
