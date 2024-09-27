@@ -108,7 +108,7 @@ classdef LabBotsControl
                 fprintf('Picking up %s from test tube %d...\n', chemical, locationIndex);
                 
                 % Move to the test tube location to pick up the chemical
-                startPos = self.getEndEffectorPos; 
+                startPos = self.getEndEffectorPos(rUR3); 
                 finishPos = testTubeLocation{locationIndex};  % Test tube location
                 
                 % Move UR3 to the test tube
@@ -175,6 +175,24 @@ classdef LabBotsControl
                 fprintf(' ]\n');
             end
         
+            % Get the current joint positions of the robot
+            qCurrent = robot.getpos();
+        
+            % Check if the current robot position is equal to the start position (q{1})
+            if isequal(q{1}, qCurrent)
+                fprintf('Robot is at the start position.\n');
+            else
+                fprintf('Moving robot to the start position...\n');
+        
+                % If the robot is not at the start position, move it there
+                qMatrix = jtraj(qCurrent, q{1}, steps);  
+                
+                % Animate the movement to the start position
+                for i = 1:size(qMatrix, 1)
+                    robot.model.animate(qMatrix(i, :));
+                    drawnow();
+                end
+            end
             
             % Pre-allocate matrix for combined joint trajectory
             qMatrixTotal = [];
@@ -191,6 +209,28 @@ classdef LabBotsControl
                 drawnow();
             end
             hold on
+        
+        end
+
+        %% Get End Effector Pos Function 
+        % Gets the end effector position of the robot
+        % 
+        % Input:
+        % robot: The robot you want to find the end effector position 
+        % 
+        % Output:
+        % endEffectorPos: The end effector position of the robot 
+
+
+        function endEffectorPos = getEndEffectorPos(self, robot)
+            % Get the current joint positions of the robot
+            qCurrent = robot.getpos();
+        
+            % Calculate the transformation matrix for the end-effector
+            T = robot.fkine(qCurrent);
+        
+            % Extract the position of the end-effector (X, Y, Z)
+            endEffectorPos = transl(T);
         
         end
 
