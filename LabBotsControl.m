@@ -3,7 +3,7 @@ classdef LabBotsControl
     
     properties
         % steps = 100;
-        
+        rUR3
     end
 
     methods
@@ -18,8 +18,10 @@ classdef LabBotsControl
     methods
         function SimultaneousControl(self)
             % Initaialising Robot Models
-            rUR3 = UR3;
+            self.rUR3 = UR3;
             % rLabBot = LabBot;
+
+            self.rUR3.model.plot(zeros(1, self.rUR3.model.n));
 
             %% Base transforms
 
@@ -52,8 +54,8 @@ classdef LabBotsControl
             %% Perform Movements
             % Calling Move2Global using self
             % For UR3
-            self.Move2Global(UR3_Start, UR3_Pos1, rUR3);
-            self.Move2Global(UR3_Pos1, UR3_End, rUR3);
+            self.Move2Global(UR3_Start, UR3_Pos1, self.rUR3);
+            self.Move2Global(UR3_Pos1, UR3_End, self.rUR3);
             
             % For LabBot
             % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
@@ -108,11 +110,11 @@ classdef LabBotsControl
                 fprintf('Picking up %s from test tube %d...\n', chemical, locationIndex);
                 
                 % Move to the test tube location to pick up the chemical
-                startPos = self.getEndEffectorPos(rUR3); 
+                startPos = self.getEndEffectorPos(self.rUR3); 
                 finishPos = testTubeLocation{locationIndex};  % Test tube location
                 
                 % Move UR3 to the test tube
-                self.Move2Global(startPos, finishPos, rUR3);
+                self.Move2Global(startPos, finishPos, self.rUR3);
                 
                 % self.GripperClose();
                 fprintf('Gripper closing to pick up %s...\n', chemical);
@@ -123,7 +125,7 @@ classdef LabBotsControl
                 fprintf('Moving %s to the mixing location at test tube %d...\n', chemical, mixingLocation);
                 
                 % Move robot to the mixing location with the chemical
-                self.Move2Global(startPos, finishPos, rUR3);
+                self.Move2Global(startPos, finishPos, self.rUR3);
                 
                 %% Mix Chem
                 % self.PourChem(); 
@@ -136,7 +138,7 @@ classdef LabBotsControl
                 fprintf('Returning test tube %d to its original position...\n', locationIndex);
                 
                 % Move robot back to return the test tube
-                self.Move2Global(startPos, finishPos, rUR3);
+                self.Move2Global(startPos, finishPos, self.rUR3);
                 
                 % self.GripperOpen(); 
                 fprintf('Gripper opening to release test tube %d...\n', locationIndex);
@@ -175,17 +177,20 @@ classdef LabBotsControl
                 fprintf(' ]\n');
             end
         
-            % Get the current joint positions of the robot
-            qCurrent = robot.getpos();
-        
-            % Check if the current robot position is equal to the start position (q{1})
-            if isequal(q{1}, qCurrent)
+            % Get the current end-effector position of the robot
+            currentEndEffectorPos = self.getEndEffectorPos(robot);
+            
+            % Define the start position (Cartesian coordinates) from q{1}
+            startPos = transl(startTr);  
+            
+            % Check if the current end-effector position is equal to the start position
+            if isequal(currentEndEffectorPos, startPos)
                 fprintf('Robot is at the start position.\n');
             else
                 fprintf('Moving robot to the start position...\n');
-        
+            
                 % If the robot is not at the start position, move it there
-                qMatrix = jtraj(qCurrent, q{1}, steps);  
+                qMatrix = jtraj(robot.getpos(), q{1}, steps);  % Joint trajectory from current position to start position
                 
                 % Animate the movement to the start position
                 for i = 1:size(qMatrix, 1)
@@ -193,7 +198,7 @@ classdef LabBotsControl
                     drawnow();
                 end
             end
-            
+                        
             % Pre-allocate matrix for combined joint trajectory
             qMatrixTotal = [];
             
