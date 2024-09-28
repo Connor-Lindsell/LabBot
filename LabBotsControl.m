@@ -178,11 +178,8 @@ classdef LabBotsControl
             % Get the current end-effector position of the robot
             currentEndEffectorPos = self.getEndEffectorPos(robot);
             
-            % Define the start position (Cartesian coordinates) from q{1}
-            startPos = transl(startTr);  
-            
             % Check if the current end-effector position is equal to the start position
-            if isequal(currentEndEffectorPos, startPos)
+            if isequal(currentEndEffectorPos, startTr)
                 fprintf('Robot is at the start position.\n');
             else
                 fprintf('Moving robot to the start position...\n');
@@ -241,7 +238,7 @@ classdef LabBotsControl
         %% Grab Chemical Function 
         % Toggled by GUI Button
 
-        % function grabChemical = ChooseChemical(TestTube,Chemical)
+        % function ChooseChemical(TestTube,Chemical)
         %     % get pos of chemical 
         % 
         %     % move to chemical 
@@ -257,7 +254,7 @@ classdef LabBotsControl
         %% Move To End Effector Position 
         % Toggled by GUI Button 
 
-        % function move2EndEffector = ManualMovement_Endeffector (Startpos, Endpos)
+        % function ManualMovement_Endeffector (Sta Endpos)
         %     % get pos of robotic arm
         % 
         %     % move to pos
