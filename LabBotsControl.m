@@ -4,13 +4,14 @@ classdef LabBotsControl
         rUR3
         % rLabBot
         
-        steps = 100;
+        steps = 50;
         
     end
 
     %% Constructor method
     methods
         function self = LabBotsControl
+            clc;
             self.SimultaneousControl
 
         end
@@ -19,6 +20,8 @@ classdef LabBotsControl
     %% Functions
     methods
         function SimultaneousControl(self)
+            clf;
+
             % Initaialising Robot Models
             self.rUR3 = UR3;
             % rLabBot = LabBot;
@@ -109,6 +112,7 @@ classdef LabBotsControl
                 chemical = chem2mix{i}{1};  % Name of the chemical
                 locationIndex = chem2mix{i}{2};  % Index of the test tube location
                 fprintf('Picking up %s from test tube %d...\n', chemical, locationIndex);
+                fprintf('\n');
                 
                 % Move to the test tube location to pick up the chemical
                 startPos = self.getEndEffectorPos(self.rUR3); 
@@ -119,11 +123,13 @@ classdef LabBotsControl
                 
                 % self.GripperClose();
                 fprintf('Gripper closing to pick up %s...\n', chemical);
+                fprintf('\n');
                 
                 % Move to the mixing location
                 startPos = finishPos;
                 finishPos = testTubeLocation{mixingLocation};  % Mixing location 
                 fprintf('Moving %s to the mixing location at test tube %d...\n', chemical, mixingLocation);
+                fprintf('\n');
                 
                 % Move robot to the mixing location with the chemical
                 self.Move2Global(startPos, finishPos, self.rUR3);
@@ -131,18 +137,21 @@ classdef LabBotsControl
                 %% Mix Chem
                 % self.PourChem(); 
                 fprintf('Pouring %s into test tube at the mixing location...\n', chemical);
+                fprintf('\n');
                 
                 %% Return Chem
                 % Move back to the original test tube location to return the tube
                 startPos = finishPos;
                 finishPos = testTubeLocation{locationIndex};  % Back to the original location
                 fprintf('Returning test tube %d to its original position...\n', locationIndex);
+                fprintf('\n');
                 
                 % Move robot back to return the test tube
                 self.Move2Global(startPos, finishPos, self.rUR3);
                 
                 % self.GripperOpen(); 
                 fprintf('Gripper opening to release test tube %d...\n', locationIndex);
+                fprintf('\n');
             end
         end
 
@@ -170,23 +179,30 @@ classdef LabBotsControl
                 q{i} = robot.model.ikine(transforms{i}, 'mask', [1, 1, 1, 0, 0, 0]);
                 
                 % Display the full joint angles using fprintf
-                fprintf('q%d = [', i);
-                fprintf(' %.5f', q{i});  % Display all joint angles in a row
-                fprintf(' ]\n');
+                fprintf('q%d = \n', i);
+                fprintf('\n [');
+                fprintf('  %.5f  ', q{i});  % Display all joint angles in a row
+                fprintf(']\n');
+                fprintf('\n');
             end
         
             % Get the current end-effector position of the robot
             currentEndEffectorPos = self.getEndEffectorPos(robot);
-            
-            % Check if the current end-effector position is equal to the start position
-            if isequal(currentEndEffectorPos, startTr)
-                fprintf('Robot is at the start position.\n');
+
+            % Define a tolerance for checking positions
+            tolerance = 1e-4;  % You can adjust this value based on your accuracy needs
+        
+            % Check if the current end-effector position is close enough to the start position
+            if all(abs(currentEndEffectorPos - startTr) < tolerance)
+                fprintf('Robot is already at the start position.\n');
+                fprintf('\n');
             else
                 fprintf('Moving robot to the start position...\n');
+                fprintf('\n');
             
                 % If the robot is not at the start position, move it there
                 qMatrix = jtraj(robot.model.getpos(), q{1}, self.steps);  % Joint trajectory from current position to start position
-                
+            
                 % Animate the movement to the start position
                 for i = 1:size(qMatrix, 1)
                     robot.model.animate(qMatrix(i, :));
