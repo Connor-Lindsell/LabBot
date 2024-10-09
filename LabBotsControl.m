@@ -166,42 +166,66 @@ classdef LabBotsControl
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(self, startTr, finishTr, robot)
-            % Convert the start and finish positions to 4x4 homogeneous transformation matrices
+        function Move2Global(self, startTr, finishTr, robot)             
+            % Define transforms with a downward orientation for the last joint (pointing down)
             transforms = {transl(startTr), transl(finishTr)};
             
             % Pre-allocate cell array for joint configurations
             q = cell(1, length(transforms));
-        
-            % Set desired values for q5 (90 degrees) and q6 (0 degrees)
-            q5_desired = deg2rad(90);  % q5 = 90 degrees (pi/2 radians)
-            q6_desired = deg2rad(0);   % q6 = 0 degrees
-        
-            % Loop through the transformations to solve IK for each one
+            
+            % Solve inverse kinematics for each transformation
             for i = 1:length(transforms)
-                % Set the initial guess (current joint configuration)
-                q_init = robot.model.getpos();  % Use the robot's current joint positions
+                % Use a mask that includes Z position and orientation (roll around X-axis)
+                q{i} = robot.model.ikine(transforms{i}, 'mask', [1, 1, 1, 0, 0, 0]);
                 
-                % Ensure the target transform is a 4x4 homogeneous matrix
-                targetTransform = transforms{i};
-        
-                % DEBUGGING: Print the inputs for verification
-                fprintf('Initial guess (q_init): %.5f\n', q_init);
-                fprintf('Target transform (targetTransform):\n');
-                disp(targetTransform);
-                
-                % Call the simplified iterative IK solver
-                q_solution = IterativeIKSolver(robot, targetTransform, q_init);
-        
-                % DEBUGGING: Check the output
-                fprintf('IK Solver output (q_solution):\n');
-                disp(q_solution);
-        
-                % Assign the solution to q{i}
-                q{i} = q_solution;
+                % Display the full joint angles using fprintf
+                fprintf('q%d = \n', i);
+                fprintf('\n [');
+                fprintf('  %.5f  ', q{i});  % Display all joint angles in a row
+                fprintf(']\n');
+                fprintf('\n');
             end
         
-            % Additional code to animate and move the robot...
+            % Get the current end-effector position of the robot
+            currentEndEffectorPos = self.getEndEffectorPos(robot);
+
+            % Define a tolerance for checking positions
+            tolerance = 1e-4;  % You can adjust this value based on your accuracy needs
+        
+            % Check if the current end-effector position is close enough to the start position
+            if all(abs(currentEndEffectorPos - startTr) < tolerance)
+                fprintf('Robot is already at the start position.\n');
+                fprintf('\n');
+            else
+                fprintf('Moving robot to the start position...\n');
+                fprintf('\n');
+            
+                % If the robot is not at the start position, move it there
+                qMatrix = jtraj(robot.model.getpos(), q{1}, self.steps);  % Joint trajectory from current position to start position
+            
+                % Animate the movement to the start position
+                for i = 1:size(qMatrix, 1)
+                    robot.model.animate(qMatrix(i, :));
+                    drawnow();
+                end
+            end
+                        
+            % Pre-allocate matrix for combined joint trajectory
+            qMatrixTotal = [];
+            
+            % Generate joint space trajectories for each consecutive pair of transformations
+            for i = 1:(length(q) - 1)
+                qMatrix = jtraj(q{i}, q{i + 1}, self.steps);
+                qMatrixTotal = [qMatrixTotal; qMatrix];  
+            end
+
+            % Animate the robot through the combined trajectory
+            for i = 1:size(qMatrixTotal, 1)
+                robot.model.animate(qMatrixTotal(i, :));
+                drawnow();
+            end
+            hold on
+
         end
 
 
@@ -227,39 +251,39 @@ classdef LabBotsControl
         
         end
 
-        %%
-        function q_solution = IterativeIKSolver(robot, targetTransform, q_init)
-            max_iters = 100;       % Maximum number of iterations
-            tolerance = 1e-4;      % Tolerance for stopping condition
-            alpha = 0.01;          % Step size for gradient descent
-        
-            q_solution = q_init;   % Initialize joint angles to the initial guess
-        
-            for iter = 1:max_iters
-                % Compute current end-effector transform using forward kinematics
-                T_current = robot.model.fkine(q_solution);
-                
-                % Compute pose error between current and target transforms
-                pose_error = norm(transl(T_current) - transl(targetTransform));
-                
-                % If the error is below the tolerance, stop the iterations
-                if pose_error < tolerance
-                    fprintf('Converged after %d iterations.\n', iter);
-                    break;
-                end
-                
-                % Compute the gradient of the error with respect to q (using finite differences)
-                dq = GradientOfError(robot, q_solution, targetTransform);
-                
-                % Update joint angles based on the gradient
-                q_solution = q_solution - alpha * dq;
-            end
-            
-            if iter == max_iters
-                fprintf('Max iterations reached without full convergence.\n');
-            end
-        end               
-       
+        %% IterativeIKSolver 
+        % function q_solution = IterativeIKSolver(robot, targetTransform, q_init)
+        %     max_iters = 100;       % Maximum number of iterations
+        %     tolerance = 1e-4;      % Tolerance for stopping condition
+        %     alpha = 0.01;          % Step size for gradient descent
+        % 
+        %     q_solution = q_init;   % Initialize joint angles to the initial guess
+        % 
+        %     for iter = 1:max_iters
+        %         % Compute current end-effector transform using forward kinematics
+        %         T_current = robot.model.fkine(q_solution);
+        % 
+        %         % Compute pose error between current and target transforms
+        %         pose_error = norm(transl(T_current) - transl(targetTransform));
+        % 
+        %         % If the error is below the tolerance, stop the iterations
+        %         if pose_error < tolerance
+        %             fprintf('Converged after %d iterations.\n', iter);
+        %             break;
+        %         end
+        % 
+        %         % Compute the gradient of the error with respect to q (using finite differences)
+        %         dq = GradientOfError(robot, q_solution, targetTransform);
+        % 
+        %         % Update joint angles based on the gradient
+        %         q_solution = q_solution - alpha * dq;
+        %     end
+        % 
+        %     if iter == max_iters
+        %         fprintf('Max iterations reached without full convergence.\n');
+        %     end
+        % end               
+        % 
     end
 
 end
