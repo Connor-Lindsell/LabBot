@@ -116,7 +116,7 @@ classdef LabBotsControl
                 
                 % Move to the test tube location to pick up the chemical
                 startPos = self.getEndEffectorPos(self.rUR3); 
-                finishPos = testTubeLocation{locationIndex};  % Test tube location
+                finishPos = testTubeLocation{locationIndex};  % Test tube location 
                 
                 % Move UR3 to the test tube
                 self.Move2Global(startPos, finishPos, self.rUR3);
@@ -193,6 +193,12 @@ classdef LabBotsControl
                 fprintf('  %.5f  ', q{i});  % Display all joint angles in a row
                 fprintf(']\n');
                 fprintf('\n');
+
+                % Check for self-collision after calculating the configuration
+                if self.selfCollisionCheck(robot, q{i})
+                    fprintf('Collision detected! Movement aborted.\n');
+                    return;
+                end
             end
         
             %% Check End Effector
@@ -227,6 +233,15 @@ classdef LabBotsControl
             % Generate joint space trajectories for each consecutive pair of transformations
             for i = 1:(length(q) - 1)
                 qMatrix = jtraj(q{i}, q{i + 1}, self.steps);
+
+                % Check for collisions along the trajectory
+                for j = 1:size(qMatrix, 1)
+                    if self.selfCollisionCheck(robot, qMatrix(j, :))
+                        fprintf('Collision detected during animation! Movement stopped.\n');
+                        return;
+                    end
+                end
+
                 qMatrixTotal = [qMatrixTotal; qMatrix];  
             end
         
@@ -291,6 +306,38 @@ classdef LabBotsControl
                 else
                     % Z points in the negative Y direction
                     rpy = trotz(-pi/2) * trotx(-pi/2);
+                end
+            end
+        end
+
+        %% Collision Checking 
+        % collision checking for the Robot arm 
+        function isCollision = selfCollisionCheck(self, robot, q)
+            % Assume initially no collision
+            isCollision = false;
+            
+            % Get the number of links in the robot
+            numLinks = robot.model.n;
+            
+            % Calculate the transformation for each link
+            linkTransforms = cell(1, numLinks);
+            for i = 1:numLinks
+                linkTransforms{i} = robot.model.A(1:i, q);
+            end
+            
+            % Iterate over pairs of links to check for collisions
+            for i = 1:numLinks
+                for j = i+2:numLinks  % Skip adjacent links
+                    % Get the positions of the links as points (e.g., midpoints)
+                    link1Pos = transl(linkTransforms{i}.T);
+                    link2Pos = transl(linkTransforms{j}.T);
+                    
+                    % Use a simple distance check for now
+                    distance = norm(link1Pos - link2Pos);
+                    if distance < 0.05  % Threshold for collision detection
+                        isCollision = true;
+                        return;
+                    end
                 end
             end
         end
