@@ -167,47 +167,60 @@ classdef LabBotsControl
         
 
         function Move2Global(self, startTr, finishTr, robot)      
-            %% Inverse Kinematics
-            % Roll Pitch Yaw Calc
-            rpy = self.RollPitchYawCalc(finishTr);
+            maxAttempts = 10;  % Maximum number of attempts to find a collision-free path
+            attempt = 0;
+            collisionFree = false;
+            initialGuess = robot.model.getpos();  % Use the robot's current position as the initial guess
         
-            % Define transforms: translation of XYZ multiplied by RPY
-            transforms = {transl(startTr), transl(finishTr) * rpy};
-            
-            % Pre-allocate cell array for joint configurations
-            q = cell(1, length(transforms));
-            
-            % Solve inverse kinematics for each transformation
-            for i = 1:length(transforms)
+            while ~collisionFree && attempt < maxAttempts
+                attempt = attempt + 1;
                 
-                % Initial Guess for ikine
-                % Not needed anymore using ikcon
-                % qn = [pi, deg2rad(-75), deg2rad(25),deg2rad(-75), deg2rad(90),0];
+                %% Inverse Kinematics
+                % Roll Pitch Yaw Calc
+                rpy = self.RollPitchYawCalc(finishTr);
         
-                % Using Ikcon to solve the inverse inematics for the qvalues of the transform
-                q{i} = robot.model.ikcon(transforms{i});
+                % Define transforms: translation of XYZ multiplied by RPY
+                transforms = {transl(startTr), transl(finishTr) * rpy};
                 
-                % Display the full joint angles using fprintf
-                fprintf('q%d = \n', i);
-                fprintf('\n [');
-                fprintf('  %.5f  ', q{i});  % Display all joint angles in a row
-                fprintf(']\n');
-                fprintf('\n');
-
-                % Check for self-collision after calculating the configuration
-                if self.selfCollisionCheck(robot, q{i})
-                    fprintf('Collision detected! Movement aborted.\n');
-                    return;
+                % Pre-allocate cell array for joint configurations
+                q = cell(1, length(transforms));
+                collisionDetected = false;
+                
+                % Solve inverse kinematics for each transformation
+                for i = 1:length(transforms)
+                    % Attempt inverse kinematics with the initial guess
+                    q{i} = robot.model.ikcon(transforms{i}, initialGuess);
+                    
+                    % Check for self-collision after calculating the configuration
+                    if self.selfCollisionCheck(robot, q{i})
+                        collisionDetected = true;
+                        fprintf('Collision detected on attempt %d. Recalculating...\n', attempt);
+                        break;
+                    end
+                end
+                
+                % If no collision is detected, break the loop
+                if ~collisionDetected
+                    collisionFree = true;
+                else
+                    % Modify initial guess slightly for next attempt
+                    initialGuess = initialGuess + rand(1, robot.model.n) * 0.1 - 0.05;  % Random small variation
                 end
             end
         
+            % If a collision-free configuration was not found, exit function
+            if ~collisionFree
+                fprintf('Failed to find a collision-free configuration after %d attempts.\n', maxAttempts);
+                return;
+            end
+    
             %% Check End Effector
             % Get the current end-effector position of the robot
             currentEndEffectorPos = self.getEndEffectorPos(robot);
-
+    
             % Define a tolerance for checking positions
             tolerance = 1e-4;  % You can adjust this value based on your accuracy needs
-
+    
             % Check if the current end-effector position is close enough to the start position
             if all(abs(currentEndEffectorPos - startTr) < tolerance)
                 fprintf('Robot is already at the start position.\n');
@@ -215,10 +228,10 @@ classdef LabBotsControl
             else
                 fprintf('Moving robot to the start position...\n');
                 fprintf('\n');
-
+    
                 % If the robot is not at the start position, move it there
                 qMatrix = jtraj(robot.model.getpos(), q{1}, self.steps);  % Joint trajectory from current position to start position
-
+    
                 % Animate the movement to the start position
                 for i = 1:size(qMatrix, 1)
                     robot.model.animate(qMatrix(i, :));
@@ -233,15 +246,16 @@ classdef LabBotsControl
             % Generate joint space trajectories for each consecutive pair of transformations
             for i = 1:(length(q) - 1)
                 qMatrix = jtraj(q{i}, q{i + 1}, self.steps);
-
+                
                 % Check for collisions along the trajectory
                 for j = 1:size(qMatrix, 1)
                     if self.selfCollisionCheck(robot, qMatrix(j, :))
-                        fprintf('Collision detected during animation! Movement stopped.\n');
+                        fprintf('Collision detected during animation. Recalculating path...\n');
+                        self.Move2Global(startTr, finishTr, robot);  % Reattempt with the same function call
                         return;
                     end
                 end
-
+                
                 qMatrixTotal = [qMatrixTotal; qMatrix];  
             end
         
@@ -253,7 +267,6 @@ classdef LabBotsControl
                 pause(0.05);
             end
             hold on
-        
         end
 
         %% Calculate Roll Pitch Yaw Orientation
