@@ -46,9 +46,8 @@ classdef LabBotsControl
             
             %% Trasforms
             % UR3 End Effector Goal Destinations 
-            UR3_Start = [0.2,0.3,0.2];
-            UR3_Pos1 = [0.3,-0.2,0.1];
-            UR3_End = [-0.2,0.1,0.3];
+            UR3_Pos1 = [0.3,0.2,0.1];
+            UR3_End = [-0.2,-0.3,0.3];
     
             % LabBot End Effector Goal Destinations 
             % LabBot_Start = [0.2,0.2,0.2];
@@ -59,8 +58,8 @@ classdef LabBotsControl
             %% Perform Movements
             % Calling Move2Global using self
             % For UR3
-            self.Move2Global(UR3_Start, UR3_Pos1, self.rUR3);
-            self.Move2Global(UR3_Pos1, UR3_End, self.rUR3);
+            self.Move2Global(UR3_Pos1, self.rUR3);
+            self.Move2Global(UR3_End, self.rUR3);
             
             % For LabBot
             % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
@@ -115,24 +114,22 @@ classdef LabBotsControl
                 fprintf('\n');
                 
                 % Move to the test tube location to pick up the chemical
-                startPos = self.getEndEffectorPos(self.rUR3); 
                 finishPos = testTubeLocation{locationIndex};  % Test tube location 
                 
                 % Move UR3 to the test tube
-                self.Move2Global(startPos, finishPos, self.rUR3);
+                self.Move2Global(finishPos, self.rUR3);
                 
                 % self.GripperClose();
                 fprintf('Gripper closing to pick up %s...\n', chemical);
                 fprintf('\n');
                 
                 % Move to the mixing location
-                startPos = finishPos;
                 finishPos = testTubeLocation{mixingLocation};  % Mixing location 
                 fprintf('Moving %s to the mixing location at test tube %d...\n', chemical, mixingLocation);
                 fprintf('\n');
                 
                 % Move robot to the mixing location with the chemical
-                self.Move2Global(startPos, finishPos, self.rUR3);
+                self.Move2Global(finishPos, self.rUR3);
                 
                 %% Mix Chem
                 % self.PourChem(); 
@@ -141,13 +138,12 @@ classdef LabBotsControl
                 
                 %% Return Chem
                 % Move back to the original test tube location to return the tube
-                startPos = finishPos;
                 finishPos = testTubeLocation{locationIndex};  % Back to the original location
                 fprintf('Returning test tube %d to its original position...\n', locationIndex);
                 fprintf('\n');
                 
                 % Move robot back to return the test tube
-                self.Move2Global(startPos, finishPos, self.rUR3);
+                self.Move2Global(finishPos, self.rUR3);
                 
                 % self.GripperOpen(); 
                 fprintf('Gripper opening to release test tube %d...\n', locationIndex);
@@ -160,95 +156,38 @@ classdef LabBotsControl
         % Moves the selected Robot Arm From a Start Position to  Finish
         % Position
         % 
-        % Inputs - 
-        % Start Transform: the start lcation of the robot end effector 
+        % Inputs -  
         % Finish Transform: the end location of the robot end effector 
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(self, startTr, finishTr, robot)      
-            %% Inverse Kinematics
-            % Roll Pitch Yaw Calc
+        function Move2Global(self, finishTr, robot)      
+            %% Inverse Kinematics with Optimization
+            % Calculate the target transform including orientation
             rpy = self.RollPitchYawCalc(finishTr);
-        
-            % Define transforms: translation of XYZ multiplied by RPY
-            transforms = {transl(startTr), transl(finishTr) * rpy};
+            targetTransform = transl(finishTr) * rpy;
             
-            % Pre-allocate cell array for joint configurations
-            q = cell(1, length(transforms));
+            % Optimize movement to reach the target transform
+            optimizedConfiguration = self.OptimizeMovement(targetTransform, robot);
             
-            % Solve inverse kinematics for each transformation
-            for i = 1:length(transforms)
-                
-                % Initial Guess for ikine
-                % Not needed anymore using ikcon
-                % qn = [pi, deg2rad(-75), deg2rad(25),deg2rad(-75), deg2rad(90),0];
-        
-                % Using Ikcon to solve the inverse inematics for the qvalues of the transform
-                q{i} = robot.model.ikcon(transforms{i});
-                
-                % Display the full joint angles using fprintf
-                fprintf('q%d = \n', i);
-                fprintf('\n [');
-                fprintf('  %.5f  ', q{i});  % Display all joint angles in a row
-                fprintf(']\n');
-                fprintf('\n');
-
-                % Check for self-collision after calculating the configuration
-                if self.selfCollisionCheck(robot, q{i})
-                    fprintf('Collision detected! Movement aborted.\n');
-                    return;
-                end
+            % If optimization fails, return early
+            if isempty(optimizedConfiguration)
+                fprintf('Optimization failed. Unable to move to the goal position.\n');
+                return;
             end
         
-            %% Check End Effector
-            % Get the current end-effector position of the robot
-            currentEndEffectorPos = self.getEndEffectorPos(robot);
-
-            % Define a tolerance for checking positions
-            tolerance = 1e-4;  % You can adjust this value based on your accuracy needs
-
-            % Check if the current end-effector position is close enough to the start position
-            if all(abs(currentEndEffectorPos - startTr) < tolerance)
-                fprintf('Robot is already at the start position.\n');
-                fprintf('\n');
-            else
-                fprintf('Moving robot to the start position...\n');
-                fprintf('\n');
-
-                % If the robot is not at the start position, move it there
-                qMatrix = jtraj(robot.model.getpos(), q{1}, self.steps);  % Joint trajectory from current position to start position
-
-                % Animate the movement to the start position
-                for i = 1:size(qMatrix, 1)
-                    robot.model.animate(qMatrix(i, :));
-                    drawnow();
-                end
-            end
-                
             %% Joint Trajectory
-            % Pre-allocate matrix for combined joint trajectory
-            qMatrixTotal = [];
+            % Get the current joint configuration of the robot
+            startConfiguration = robot.model.getpos();
             
-            % Generate joint space trajectories for each consecutive pair of transformations
-            for i = 1:(length(q) - 1)
-                qMatrix = jtraj(q{i}, q{i + 1}, self.steps);
-
-                % Check for collisions along the trajectory
-                for j = 1:size(qMatrix, 1)
-                    if self.selfCollisionCheck(robot, qMatrix(j, :))
-                        fprintf('Collision detected during animation! Movement stopped.\n');
-                        return;
-                    end
-                end
-
-                qMatrixTotal = [qMatrixTotal; qMatrix];  
-            end
+            % Generate joint space trajectory from start to optimized configuration
+            qMatrix = jtraj(startConfiguration, optimizedConfiguration, self.steps);
+            
         
             %% Animation
             % Animate the robot through the combined trajectory
-            for i = 1:size(qMatrixTotal, 1)
-                robot.model.animate(qMatrixTotal(i, :));
+            for i = 1:size(qMatrix, 1)
+                robot.model.animate(qMatrix(i, :));
                 drawnow();
                 pause(0.05);
             end
@@ -343,6 +282,68 @@ classdef LabBotsControl
         end
 
 
+        %% Optimised Movement
+        function optimizedConfiguration = OptimizeMovement(self, targetTransform, robot)
+            % Initial joint configuration (use the current robot position)
+            initialGuess = robot.model.getpos();
+            
+            % Joint limits (adjust these based on your robot specs)
+            jointMin = [deg2rad(-360), -pi, deg2rad(-360), deg2rad(-360), deg2rad(-360), deg2rad(-360)];
+            jointMax = [deg2rad(360), 0, deg2rad(360), deg2rad(360), deg2rad(360), deg2rad(360)];
+            
+            % Define the optimization problem using fmincon
+            options = optimoptions('fmincon', 'Algorithm', 'interior-point', ...
+                'Display', 'iter', 'MaxIterations', 100);
+            
+            % Define the objective function
+            objectiveFunction = @(q) self.ObjectiveFunction(q, targetTransform, robot);
+            
+            % Set up constraints: joint limits and simple collision detection
+            constraints = @(q) self.JointConstraints(q, jointMin, jointMax, robot);
+            
+            % Run the optimization
+            [optimizedConfiguration, fval, exitflag] = fmincon(objectiveFunction, initialGuess, [], [], [], [], jointMin, jointMax, constraints, options);
+            
+            % Check if optimization succeeded
+            if exitflag <= 0
+                optimizedConfiguration = [];  % Return empty if optimization failed
+                warning('Optimization did not converge to a solution.');
+            else
+                fprintf('Optimization completed successfully.\n');
+            end
+        end
+
+        %% Objective Function 
+        function cost = ObjectiveFunction(self, q, targetTransform, robot)
+            % Forward kinematics of the robot with the current joint configuration
+            T = robot.model.fkine(q);
+            
+            % Calculate the error as the difference between the current and target transforms
+            positionError = norm(transl(T) - transl(targetTransform));
+            orientationError = norm(t2r(T) - t2r(targetTransform), 'fro');
+            
+            % Combine errors into a cost (weighted sum)
+            cost = positionError + 0.1 * orientationError;  % Adjust weights as needed
+        end
+        
+        %% Joint Constraints 
+        function [c, ceq] = JointConstraints(self, q, jointMin, jointMax, robot)
+            % No equality constraints
+            ceq = [];
+            
+            % 1. Joint Limit Constraints
+            % Ensure joint angles do not exceed their limits
+            jointLimitUpper = q - jointMax; % Difference between joint values and upper limits
+            jointLimitLower = jointMin - q; % Difference between joint values and lower limits
+            
+            % Collect joint limit constraints into 'c'
+            c = [jointLimitUpper; jointLimitLower];
+            
+            % Note: No collision or ground clearance constraints for now
+        end
+
+
+    
         %% Get End Effector Pos Function 
         % Gets the end effector position of the robot
         % 
@@ -366,5 +367,5 @@ classdef LabBotsControl
         end
         
     end
-
+    
 end
