@@ -169,15 +169,10 @@ classdef LabBotsControl
         function Move2Global(self, startTr, finishTr, robot)      
             %% Inverse Kinematics
             % Roll Pitch Yaw Calc
-            % 
-            % FOR FUTURE: 
-            % this will become another function that will check
-            % where the transform is in relation to the robot base and then
-            % will decide the orienation of the end effector
-            rpy = troty(pi/2) * trotx(pi/2);
+            rpy = self.RollPitchYawCalc(finishTr);
         
             % Define transforms: translation of XYZ multiplied by RPY
-            transforms = {transl(startTr) * rpy, transl(finishTr) * rpy};
+            transforms = {transl(startTr), transl(finishTr) * rpy};
             
             % Pre-allocate cell array for joint configurations
             q = cell(1, length(transforms));
@@ -244,6 +239,60 @@ classdef LabBotsControl
             end
             hold on
         
+        end
+
+        %% Calculate Roll Pitch Yaw Orientation
+        % Calculates the Roll Pitch and Yaw of the end effector in relation
+        % to the location of the finsih transform to the base of the Robot
+        %
+        % Input:
+        % FinishTr: the end location of the robot end effector 
+        % 
+        % Rutput:
+        % rpy: the orientation of the end effector
+
+        function rpy = RollPitchYawCalc(self, finishTr)
+            % Extract X and Y coordinates of the finish transform
+            x = finishTr(1);
+            y = finishTr(2);
+            
+            % Default orientation: Z points in the positive X direction, Y points up
+            rpy = trotz(0) * troty(pi/2);
+            
+            % Determine the quadrant and set the orientation
+            if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
+                if x >= y
+                    % Z points in the positive X direction
+                    rpy = trotz(0) * troty(pi/2);
+                else
+                    % Z points in the positive Y direction
+                    rpy = trotz(pi/2) * trotx(pi/2);
+                end
+            elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
+                if abs(x) >= y
+                    % Z points in the negative X direction
+                    rpy = trotz(pi) * troty(-pi/2);
+                else
+                    % Z points in the positive Y direction
+                    rpy = trotz(pi/2) * trotx(pi/2);
+                end
+            elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
+                if abs(x) >= abs(y)
+                    % Z points in the negative X direction
+                    rpy = trotz(pi) * troty(-pi/2);
+                else
+                    % Z points in the negative Y direction
+                    rpy = trotz(-pi/2) * trotx(-pi/2);
+                end
+            else  % Fourth quadrant (X positive, Y negative)
+                if x >= abs(y)
+                    % Z points in the positive X direction
+                    rpy = trotz(0) * troty(pi/2);
+                else
+                    % Z points in the negative Y direction
+                    rpy = trotz(-pi/2) * trotx(-pi/2);
+                end
+            end
         end
 
 
