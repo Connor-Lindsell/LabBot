@@ -4,6 +4,11 @@
 % 6 revolute joints, Elbow and Wrist joints 
 
 classdef LabBot_7DOF < RobotBaseClass
+
+    properties(Access = public)   
+        plyFileNameStem = 'LabBot_7DOF';
+    end
+
     methods
         %% Constructor
         function self = LabBot_7DOF(baseTr)
@@ -13,7 +18,7 @@ classdef LabBot_7DOF < RobotBaseClass
             end
             self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);
             
-            %self.PlotAndColourRobot();         
+            self.PlotAndColourRobot();         
         end
 
         %% CreateModel
