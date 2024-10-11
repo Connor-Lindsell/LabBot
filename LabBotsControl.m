@@ -47,7 +47,7 @@ classdef LabBotsControl
             % UR3 End Effector Goal Destinations 
             % Cheecking for correct orientation
             UR3_Pos1 = [0.3,0.2,0.2]; % positive x Q++
-            UR3_Pos2 = [-0.3,-0.2,0.2]; % negative x Q-+
+            UR3_Pos2 = [-0.3,0.2,0.2]; % negative x Q-+
             UR3_Pos3 = [0.2,0.3,0.2]; % positive y Q++
             UR3_Pos4 = [0.2,-0.3,0.2]; % negative y Q+-
             UR3_Pos5 = [0.3,-0.2,0.2]; % positive x Q+-
@@ -177,7 +177,11 @@ classdef LabBotsControl
         function Move2Global(self, finishTr, robot)
             % Calculate the target transform including orientation
             rpy = self.RollPitchYawCalc(finishTr);
-            targetTransform = transl(finishTr) * rpy;
+            targetTransform = transl(finishTr) * rpy ;
+
+            % Display the target transform
+            fprintf('Target Transform (before IK):\n');
+            disp(targetTransform);
             
             % Get initial guess based on quadrant
             initialGuess = self.GetInitialGuess(finishTr);
@@ -187,13 +191,46 @@ classdef LabBotsControl
             
             % Solve inverse kinematics for position using the initial guess
             qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', mask);
+
+            qPosAngles = rad2deg (qPos);
+
+            fprintf('qPos = \n');
+            fprintf('\n [');
+            fprintf('  %.5f  ', qPos);  % Display all joint angles in a row
+            fprintf(']\n');
+            fprintf('\n [');
+            fprintf('  %.5f  ', qPosAngles);  % Display all joint angles in a row
+            fprintf(']\n');
+            fprintf('\n');
+
+            % Calculate and display the resulting end-effector position using qPos
+            endEffectorPos1 = robot.model.fkine(qPos);
+            fprintf('End Effector Position after qPos = \n');
+            disp(transl(endEffectorPos1));
+            fprintf('\n');
             
             % Solve inverse kinematics for position and orientation using qPos as the guess
-            maskOrientation = [1 1 1 0 1 1];
+            maskOrientation = [1 1 1 1 1 1];
             qSolution = robot.model.ikine(targetTransform, 'q0', qPos, 'mask', maskOrientation);
-            
-            % Check if a solution was found
-            if isempty(qSolution)
+
+            qSolutionAngles = rad2deg (qSolution);
+                        
+            % Debugging: Display the end-effector position after qSolution calculation
+            if ~isempty(qSolution)
+                fprintf('qSolution = \n');
+                fprintf('\n [');
+                fprintf('  %.5f  ', qSolution);  % Display all joint angles in a row
+                fprintf(']\n');
+                fprintf('\n [');
+                fprintf('  %.5f  ', qSolutionAngles);  % Display all joint angles in a row
+                fprintf(']\n');
+                fprintf('\n');
+                
+                endEffectorPos2 = robot.model.fkine(qSolution);
+                fprintf('End Effector Position after qSolution = \n');
+                disp(transl(endEffectorPos2));
+                fprintf('\n');
+            else
                 fprintf('Inverse kinematics failed to find a solution.\n');
                 return;
             end
@@ -211,6 +248,7 @@ classdef LabBotsControl
             hold on;
         
             fprintf("Movement Complete\n");
+            fprintf('\n');
         end
 
 
@@ -225,11 +263,6 @@ classdef LabBotsControl
         % Rutput:
         % rpy: the orientation of the end effector
 
-        % TO DO: 
-        % The angles aren't pointing in the right direction, have to go through
-        % all of them to make sure the z is pointing in the right direction
-        % and the y is pointing along the positive z
-
         function rpy = RollPitchYawCalc(self, finishTr)
             % Extract X and Y coordinates of the finish transform
             x = finishTr(1);
@@ -242,36 +275,52 @@ classdef LabBotsControl
             if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
                 if x >= y
                     % Z points in the positive X direction
-                    rpy = trotz(0) * troty(pi/2);  % Pitch up
+                    rpy = trotz(pi/2) * troty(pi/2);  
+                    disp("Quadrant 1, 1")
                 else
                     % Z points in the positive Y direction
-                    rpy = trotz(pi/2);  % Yaw to point along positive Y
+                    rpy = trotx(-pi)*trotz(-pi/2);  
+                    disp("Quadrant 1, 2")
                 end
+
             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
                 if abs(x) >= y
                     % Z points in the negative X direction
-                    rpy = trotz(pi) * troty(pi/2);  % Pitch up
+                    rpy = trotx(-pi/2) * troty(-pi/2);  % Pitch up
+                    disp("Quadrant 2, 1")
                 else
                     % Z points in the positive Y direction
-                    rpy = trotz(pi/2);  % Yaw to point along positive Y
+                    rpy = trotx(pi)*trotz(-pi/2);  % Yaw to point along positive Y
+                    disp("Quadrant 2, 2")
                 end
+
             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
                 if abs(x) >= abs(y)
                     % Z points in the negative X direction
-                    rpy = trotz(pi) * troty(pi/2);  % Pitch up
+                    rpy = trotz(pi) * troty(-pi/2);  % Pitch up
+                    disp("Quadrant 3, 1")
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(-pi/2);  % Yaw to point along negative Y
+                    rpy = trotz(pi/2);  % Yaw to point along negative Y
+                    disp("Quadrant 3, 2")
                 end
+
             else  % Fourth quadrant (X positive, Y negative)
                 if x >= abs(y)
                     % Z points in the positive X direction
-                    rpy = trotz(0) * troty(pi/2);  % Pitch up
+                    rpy = trotz(pi);  % Pitch up
+                    disp("Quadrant 4, 1")
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(-pi/2);  % Yaw to point along negative Y
+                    rpy = troty(pi/2) * trotz(pi/2);  % Yaw to point along negative Y
+                    disp("Quadrant 4, 2")
                 end
             end
+
+            % Debug: Display the final rpy matrix
+            disp("Final rpy matrix:");
+            disp(rpy);
+
         end
 
         %% Initial Guess for Ikine
@@ -284,21 +333,47 @@ classdef LabBotsControl
             initialGuess = zeros(1, 6);  % Adjust based on your robot's number of joints
         
             % Set different initial guesses based on the quadrant
-            if x >= 0 && y >= 0  
-                % First quadrant (both X and Y are positive)
-                initialGuess = [deg2rad(-135), -pi/4, pi/2, -pi/4, pi/2, 0];
-            elseif x < 0 && y >= 0  
-                % Second quadrant (X negative, Y positive)
-                initialGuess = [-pi/4, -pi/4, pi/2, -pi/4, pi/2, 0];
-            elseif x < 0 && y < 0  
-                % Third quadrant (both X and Y are negative)
-                initialGuess = [pi/4, -pi/4, pi/2, -pi/4, pi/2, 0];
-            else  
-                % Fourth quadrant (X positive, Y negative)
-                initialGuess = [deg2rad(135), -pi/4, pi/2, -pi/4, pi/2, 0];
-            end
+             if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
+                if x >= y
+                    % First quadrant (both X and Y are positive)
+                    initialGuess = [deg2rad(40), deg2rad(-135), -pi/2, deg2rad(225), deg2rad(-50), 0];
+                else
+                    % First quadrant (both X and Y are positive)
+                    initialGuess = [deg2rad(-130), -pi/4, pi/2, -pi/4, deg2rad(50), 0];
+                end
+            
+             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
+                if abs(x) >= y
+                    % Second quadrant (X negative, Y positive)
+                    initialGuess = [deg2rad(-40), -pi/4, pi/2, -pi/4, deg2rad(50) 0];
+                else
+                    % Second quadrant (X negative, Y positive)
+                    initialGuess = [deg2rad(130), deg2rad(-135), -pi/2, deg2rad(225), deg2rad(-50), 0];
+                end
+            
+             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
+                if abs(x) >= abs(y)
+                    % Third quadrant (both X and Y are negative)
+                    initialGuess = [deg2rad(-140), deg2rad(-135), -pi/2, deg2rad(225), deg2rad(-50), 0];
+                else
+                    % Third quadrant (both X and Y are negative)
+                    initialGuess = [deg2rad(50), -pi/4, pi/2, -pi/4, deg2rad(50), 0];
+                end
+            
+             else  
+                 % Fourth quadrant (X positive, Y negative)
+                 if x >= abs(y)
+                    % Fourth quadrant (X positive, Y negative)
+                    initialGuess = [deg2rad(-50), deg2rad(-135), -pi/2, deg2rad(225), deg2rad(-50), 0];
+                 else
+                    % Fourth quadrant (X positive, Y negative)
+                    initialGuess = [deg2rad(140), -pi/4, pi/2, -pi/4, deg2rad(50), 0];
+                end
+             end 
         end
-
+         
+       
+       
 
         %% Collision Checking 
         % collision checking for the Robot arm 
