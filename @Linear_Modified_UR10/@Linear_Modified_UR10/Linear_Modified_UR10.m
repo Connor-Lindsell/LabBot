@@ -1,4 +1,7 @@
 classdef Linear_Modified_UR10 < RobotBaseClass
+
+    %code has errors atm
+    
     %% LinearUR10 UR10 on a non-standard linear rail created by a student
 
     %properties(Access = public)              
