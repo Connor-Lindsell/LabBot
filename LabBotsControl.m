@@ -22,12 +22,11 @@ classdef LabBotsControl
         function SimultaneousControl(self)
             clf;
 
+            %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
             % rLabBot = LabBot;
-
-            self.rUR3.model.plot(zeros(1, self.rUR3.model.n));
-
+           
             %% Base transforms
 
             %% Set Up Enviorment 
@@ -46,14 +45,15 @@ classdef LabBotsControl
             
             %% Trasforms
             % UR3 End Effector Goal Destinations 
-            UR3_Pos1 = [0.3,0.2,0.2]; % positive x
-            UR3_Pos2 = [-0.2,-0.3,0.2]; % negative x
-            UR3_Pos3 = [0.3,0.2,0.2]; % positive y
-            UR3_Pos4 = [0.3,0.2,0.2]; % negative y
-            UR3_Pos5 = [0.3,0.2,0.2]; % positive x
-            UR3_Pos6 = [0.3,0.2,0.2]; % positive x
-            UR3_Pos7 = [0.3,0.2,0.2]; % positive y
-            UR3_Pos8 = [0.3,0.2,0.2]; % positive y
+            % Cheecking for correct orientation
+            UR3_Pos1 = [0.3,0.2,0.2]; % positive x Q++
+            UR3_Pos2 = [-0.3,-0.2,0.2]; % negative x Q-+
+            UR3_Pos3 = [0.2,0.3,0.2]; % positive y Q++
+            UR3_Pos4 = [0.2,-0.3,0.2]; % negative y Q+-
+            UR3_Pos5 = [0.3,-0.2,0.2]; % positive x Q+-
+            UR3_Pos6 = [-0.3,-0.2,0.2]; % negative x Q--
+            UR3_Pos7 = [-0.2,0.3,0.2]; % positive y Q-+
+            UR3_Pos8 = [-0.2,-0.3,0.2]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
             % LabBot_Pos1 = [0.2,0.2,0.2];
@@ -65,6 +65,13 @@ classdef LabBotsControl
             % For UR3
             self.Move2Global(UR3_Pos1, self.rUR3);
             self.Move2Global(UR3_Pos2, self.rUR3);
+            self.Move2Global(UR3_Pos3, self.rUR3);
+            self.Move2Global(UR3_Pos4, self.rUR3);
+            self.Move2Global(UR3_Pos5, self.rUR3);
+            self.Move2Global(UR3_Pos6, self.rUR3);
+            self.Move2Global(UR3_Pos7, self.rUR3);
+            self.Move2Global(UR3_Pos8, self.rUR3);
+
             
             % For LabBot
             % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
@@ -167,39 +174,46 @@ classdef LabBotsControl
         % Robot: calls the robot that is required to move
         
 
-        function Move2Global(self, finishTr, robot)      
-            %% Inverse Kinematics with Optimization
+        function Move2Global(self, finishTr, robot)
             % Calculate the target transform including orientation
             rpy = self.RollPitchYawCalc(finishTr);
             targetTransform = transl(finishTr) * rpy;
             
-            % Optimize movement to reach the target transform
-            optimizedConfiguration = self.OptimizeMovement(targetTransform, robot);
+            % Get initial guess based on quadrant
+            initialGuess = self.GetInitialGuess(finishTr);
             
-            % If optimization fails, return early
-            if isempty(optimizedConfiguration)
-                fprintf('Optimization failed. Unable to move to the goal position.\n');
+            % Define the mask [111000] to solve for XYZ position only
+            mask = [1 1 1 0 0 0];
+            
+            % Solve inverse kinematics for position using the initial guess
+            qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', mask);
+            
+            % Solve inverse kinematics for position and orientation using qPos as the guess
+            maskOrientation = [1 1 1 0 1 1];
+            qSolution = robot.model.ikine(targetTransform, 'q0', qPos, 'mask', maskOrientation);
+            
+            % Check if a solution was found
+            if isempty(qSolution)
+                fprintf('Inverse kinematics failed to find a solution.\n');
                 return;
             end
-        
-            %% Joint Trajectory
-            % Get the current joint configuration of the robot
+            
+            % Joint Trajectory
             startConfiguration = robot.model.getpos();
+            qMatrix = jtraj(startConfiguration, qSolution, self.steps);
             
-            % Generate joint space trajectory from start to optimized configuration
-            qMatrix = jtraj(startConfiguration, optimizedConfiguration, self.steps);
-            
-        
-            %% Animation
-            % Animate the robot through the combined trajectory
+            % Animation
             for i = 1:size(qMatrix, 1)
                 robot.model.animate(qMatrix(i, :));
                 drawnow();
                 pause(0.05);
             end
-            hold on
+            hold on;
         
+            fprintf("Movement Complete\n");
         end
+
+
 
         %% Calculate Roll Pitch Yaw Orientation
         % Calculates the Roll Pitch and Yaw of the end effector in relation
@@ -221,44 +235,70 @@ classdef LabBotsControl
             x = finishTr(1);
             y = finishTr(2);
             
-            % Default orientation: Z points in the positive X direction, Y points up
-            rpy = trotz(0) * troty(pi/2);
+            % Default orientation: Z points in the positive X direction, Y remains vertical
+            rpy = trotz(0) * troty(0);
             
-            % Determine the quadrant and set the orientation
+            % Determine the quadrant and set the orientation using yaw (Z rotation) and pitch (Y rotation)
             if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
                 if x >= y
                     % Z points in the positive X direction
-                    rpy = trotz(pi/2) * troty(pi/2);
+                    rpy = trotz(0) * troty(pi/2);  % Pitch up
                 else
                     % Z points in the positive Y direction
-                    rpy = trotz(pi/2) * trotx(pi/2);
+                    rpy = trotz(pi/2);  % Yaw to point along positive Y
                 end
             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
                 if abs(x) >= y
                     % Z points in the negative X direction
-                    rpy = trotz(-pi/2) * troty(-pi/2);
+                    rpy = trotz(pi) * troty(pi/2);  % Pitch up
                 else
                     % Z points in the positive Y direction
-                    rpy = trotz(pi/2) * trotx(pi/2);
+                    rpy = trotz(pi/2);  % Yaw to point along positive Y
                 end
             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
                 if abs(x) >= abs(y)
                     % Z points in the negative X direction
-                    rpy = trotz(pi) * troty(-pi/2);
+                    rpy = trotz(pi) * troty(pi/2);  % Pitch up
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(-pi/2) * trotx(-pi/2);
+                    rpy = trotz(-pi/2);  % Yaw to point along negative Y
                 end
             else  % Fourth quadrant (X positive, Y negative)
                 if x >= abs(y)
                     % Z points in the positive X direction
-                    rpy = trotz(0) * troty(pi/2);
+                    rpy = trotz(0) * troty(pi/2);  % Pitch up
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(-pi/2) * trotx(-pi/2);
+                    rpy = trotz(-pi/2);  % Yaw to point along negative Y
                 end
             end
         end
+
+        %% Initial Guess for Ikine
+        function initialGuess = GetInitialGuess(self, finishTr)
+            % Extract X and Y coordinates of the finish transform
+            x = finishTr(1);
+            y = finishTr(2);
+            
+            % Initialize guess
+            initialGuess = zeros(1, 6);  % Adjust based on your robot's number of joints
+        
+            % Set different initial guesses based on the quadrant
+            if x >= 0 && y >= 0  
+                % First quadrant (both X and Y are positive)
+                initialGuess = [deg2rad(-135), -pi/4, pi/2, -pi/4, pi/2, 0];
+            elseif x < 0 && y >= 0  
+                % Second quadrant (X negative, Y positive)
+                initialGuess = [-pi/4, -pi/4, pi/2, -pi/4, pi/2, 0];
+            elseif x < 0 && y < 0  
+                % Third quadrant (both X and Y are negative)
+                initialGuess = [pi/4, -pi/4, pi/2, -pi/4, pi/2, 0];
+            else  
+                % Fourth quadrant (X positive, Y negative)
+                initialGuess = [deg2rad(135), -pi/4, pi/2, -pi/4, pi/2, 0];
+            end
+        end
+
 
         %% Collision Checking 
         % collision checking for the Robot arm 
@@ -293,65 +333,7 @@ classdef LabBotsControl
         end
 
 
-        %% Optimised Movement
-        function optimizedConfiguration = OptimizeMovement(self, targetTransform, robot)
-            % Initial joint configuration (use the current robot position)
-            initialGuess = robot.model.getpos();
-            
-            % Joint limits (adjust these based on your robot specs)
-            jointMin = [deg2rad(-180), -pi, deg2rad(-180), deg2rad(-180), deg2rad(-180), deg2rad(-180)];
-            jointMax = [deg2rad(180), 0, deg2rad(180), deg2rad(180), deg2rad(180), deg2rad(180)];
-            
-            % Define the optimization problem using fmincon
-            options = optimoptions('fmincon', 'Algorithm', 'interior-point', ...
-                'Display', 'iter', 'MaxIterations', 100);
-            
-            % Define the objective function
-            objectiveFunction = @(q) self.ObjectiveFunction(q, targetTransform, robot);
-            
-            % Set up constraints: joint limits and simple collision detection
-            constraints = @(q) self.JointConstraints(q, jointMin, jointMax, robot);
-            
-            % Run the optimization
-            [optimizedConfiguration, fval, exitflag] = fmincon(objectiveFunction, initialGuess, [], [], [], [], jointMin, jointMax, constraints, options);
-            
-            % Check if optimization succeeded
-            if exitflag <= 0
-                optimizedConfiguration = [];  % Return empty if optimization failed
-                warning('Optimization did not converge to a solution.');
-            else
-                fprintf('Optimization completed successfully.\n');
-            end
-        end
-
-        %% Objective Function 
-        function cost = ObjectiveFunction(self, q, targetTransform, robot)
-            % Forward kinematics of the robot with the current joint configuration
-            T = robot.model.fkine(q);
-            
-            % Calculate the error as the difference between the current and target transforms
-            positionError = norm(transl(T) - transl(targetTransform));
-            orientationError = norm(t2r(T) - t2r(targetTransform), 'fro');
-            
-            % Combine errors into a cost (weighted sum)
-            cost = positionError + 0.1 * orientationError;  % Adjust weights as needed
-        end
-        
-        %% Joint Constraints 
-        function [c, ceq] = JointConstraints(self, q, jointMin, jointMax, robot)
-            % No equality constraints
-            ceq = [];
-            
-            % 1. Joint Limit Constraints
-            % Ensure joint angles do not exceed their limits
-            jointLimitUpper = q - jointMax; % Difference between joint values and upper limits
-            jointLimitLower = jointMin - q; % Difference between joint values and lower limits
-            
-            % Collect joint limit constraints into 'c'
-            c = [jointLimitUpper; jointLimitLower];
-            
-            % Note: No collision or ground clearance constraints for now
-        end
+       
 
 
     
