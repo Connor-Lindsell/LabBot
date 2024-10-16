@@ -4,7 +4,7 @@ classdef LabBotsControl
         rUR3
         % rLabBot
         
-        steps = 50;
+        steps = 100;
         
     end
 
@@ -173,83 +173,153 @@ classdef LabBotsControl
         % Finish Transform: the end location of the robot end effector 
         % Robot: calls the robot that is required to move
         
-
         function Move2Global(self, finishTr, robot)
-            % Calculate the target transform including orientation
-            rpy = self.RollPitchYawCalc(finishTr);
-            targetTransform = transl(finishTr) * rpy ;
+    % Calculate the target orientation using RollPitchYawCalc
+    rpy = self.RollPitchYawCalc(finishTr);
+    targetTransform = transl(finishTr) * rpy;
 
-            % Display the target transform
-            fprintf('Target Transform (before IK):\n');
-            disp(targetTransform);
-            
-            % Get initial guess based on quadrant
-            initialGuess = self.GetInitialGuess(finishTr);
-            
-            % Define the mask [111000] to solve for XYZ position only
-            mask = [1 1 1 0 0 0];
-            
-            % Solve inverse kinematics for position using the initial guess
-            qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', mask);
+    % Display the target transform
+    fprintf('Target Transform (before RMRC):\n');
+    disp(targetTransform);
 
-            qPosAngles = rad2deg (qPos);
+    % RMRC parameters
+    deltaT = 0.05;   % Time step for RMRC
+    RMRCsteps = 1000;  % Increase steps for smoother movement
 
-            fprintf('qPos = \n');
-            fprintf('\n [');
-            fprintf('  %.5f  ', qPos);  % Display all joint angles in a row
-            fprintf(']\n');
-            fprintf('\n [');
-            fprintf('  %.5f  ', qPosAngles);  % Display all joint angles in a row
-            fprintf(']\n');
-            fprintf('\n');
+    % Get the initial configuration and current transform
+    startConfiguration = robot.model.getpos();
+    currentTransform = robot.model.fkine(startConfiguration);
 
-            % Calculate and display the resulting end-effector position using qPos
-            endEffectorPos1 = robot.model.fkine(qPos);
-            fprintf('End Effector Position after qPos = \n');
-            disp(transl(endEffectorPos1));
-            fprintf('\n');
-            
-            % Solve inverse kinematics for position and orientation using qPos as the guess
-            maskOrientation = [1 1 1 1 1 1];
-            qSolution = robot.model.ikine(targetTransform, 'q0', qPos, 'mask', maskOrientation);
+    % Extract initial and target positions and rotations
+    initialPos = transl(currentTransform).';  % Convert to 3x1 vector
+    targetPos = transl(targetTransform);      % 3x1 vector
+    initialRot = t2r(currentTransform);       % 3x3 matrix
+    targetRot = t2r(targetTransform);         % 3x3 matrix
 
-            qSolutionAngles = rad2deg (qSolution);
-                        
-            % Debugging: Display the end-effector position after qSolution calculation
-            if ~isempty(qSolution)
-                fprintf('qSolution = \n');
-                fprintf('\n [');
-                fprintf('  %.5f  ', qSolution);  % Display all joint angles in a row
-                fprintf(']\n');
-                fprintf('\n [');
-                fprintf('  %.5f  ', qSolutionAngles);  % Display all joint angles in a row
-                fprintf(']\n');
-                fprintf('\n');
-                
-                endEffectorPos2 = robot.model.fkine(qSolution);
-                fprintf('End Effector Position after qSolution = \n');
-                disp(transl(endEffectorPos2));
-                fprintf('\n');
-            else
-                fprintf('Inverse kinematics failed to find a solution.\n');
-                return;
-            end
-            
-            % Joint Trajectory
-            startConfiguration = robot.model.getpos();
-            qMatrix = jtraj(startConfiguration, qSolution, self.steps);
-            
-            % Animation
-            for i = 1:size(qMatrix, 1)
-                robot.model.animate(qMatrix(i, :));
-                drawnow();
-                pause(0.05);
-            end
-            hold on;
-        
-            fprintf("Movement Complete\n");
-            fprintf('\n');
+    % Linear interpolation for position increments
+    deltaPos = (targetPos - initialPos) / RMRCsteps;
+
+    % Compute incremental rotation matrix
+    deltaRot = (targetRot * initialRot')^(1 / RMRCsteps);  % Rotation increment
+
+    % Initialize the current rotation matrix
+    currentRot = initialRot;
+    qCurrent = startConfiguration;  % Start with the current configuration
+
+    % RMRC loop over the given steps
+    for i = 1:RMRCsteps
+        % Incrementally update position and orientation
+        currentPos = initialPos + i * deltaPos;  % 3x1 vector
+        currentRot = deltaRot * currentRot;      % Maintain orthogonality
+
+        % Construct the intermediate target transform
+        intermediateTransform = rt2tr(currentRot, currentPos);
+
+        % Solve IK for the intermediate step using the previous configuration as the guess
+        qStep = robot.model.ikine(intermediateTransform, 'q0', qCurrent, ...
+                                  'mask', [1 1 1 1 1 1], 'tol', 1e-6, 'maxiter', 200);
+
+        % Check if IK succeeded, if not, stop the movement
+        if isempty(qStep)
+            fprintf('RMRC failed at step %d\n', i);
+            break;
         end
+
+        % Animate the robot to the new configuration
+        robot.model.animate(qStep);
+        drawnow();
+        pause(deltaT);
+
+        % Update the configuration for the next step
+        qCurrent = qStep;
+    end
+
+    fprintf("Movement Complete\n\n");
+end
+
+
+        
+
+
+        % function Move2Global(self, finishTr, robot)
+        %     % Calculate the target transform including orientation
+        %     rpy = self.RollPitchYawCalc(finishTr);
+        %     targetTransform = transl(finishTr) * rpy ;
+        % 
+        %     % Display the target transform
+        %     fprintf('Target Transform (before IK):\n');
+        %     disp(targetTransform);
+        % 
+        %     % Get initial guess based on quadrant
+        %     initialGuess = self.GetInitialGuess(finishTr);
+        % 
+        %     % Define the mask [111000] to solve for XYZ position only
+        %     mask = [1 1 1 0 0 0];
+        % 
+        %     % Solve inverse kinematics for position using the initial guess
+        %     qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', mask);
+        % 
+        %     qPosAngles = rad2deg (qPos);
+        % 
+        %     fprintf('qPos = \n');
+        %     fprintf('\n [');
+        %     fprintf('  %.5f  ', qPos);  % Display all joint angles in a row
+        %     fprintf(']\n');
+        %     fprintf('\n [');
+        %     fprintf('  %.5f  ', qPosAngles);  % Display all joint angles in a row
+        %     fprintf(']\n');
+        %     fprintf('\n');
+        % 
+        %     % Calculate and display the resulting end-effector position using qPos
+        %     endEffectorPos1 = robot.model.fkine(qPos);
+        %     fprintf('End Effector Position after qPos = \n');
+        %     disp(transl(endEffectorPos1));
+        %     fprintf('\n');
+        % 
+        %     % Set optimization options for 'ikine'
+        %     options = optimset('TolFun', 1e-6, 'TolX', 1e-8, 'MaxIter', 1000);
+        % 
+        %     % Solve inverse kinematics for position and orientation using qPos as the guess
+        %     maskOrientation = [1 1 1 1 1 1];
+        %     qSolution = robot.model.ikine(targetTransform, 'q0', qPos, 'mask', maskOrientation, options);
+        % 
+        %     qSolutionAngles = rad2deg (qSolution);
+        % 
+        %     % Debugging: Display the end-effector position after qSolution calculation
+        %     if ~isempty(qSolution)
+        %         fprintf('qSolution = \n');
+        %         fprintf('\n [');
+        %         fprintf('  %.5f  ', qSolution);  % Display all joint angles in a row
+        %         fprintf(']\n');
+        %         fprintf('\n [');
+        %         fprintf('  %.5f  ', qSolutionAngles);  % Display all joint angles in a row
+        %         fprintf(']\n');
+        %         fprintf('\n');
+        % 
+        %         endEffectorPos2 = robot.model.fkine(qSolution);
+        %         fprintf('End Effector Position after qSolution = \n');
+        %         disp(transl(endEffectorPos2));
+        %         fprintf('\n');
+        %     else
+        %         fprintf('Inverse kinematics failed to find a solution.\n');
+        %         return;
+        %     end
+        % 
+        %     % Joint Trajectory
+        %     startConfiguration = robot.model.getpos();
+        %     qMatrix = jtraj(startConfiguration, qSolution, self.steps);
+        % 
+        %     % Animation
+        %     for i = 1:size(qMatrix, 1)
+        %         robot.model.animate(qMatrix(i, :));
+        %         drawnow();
+        %         pause(0.05);
+        %     end
+        %     hold on;
+        % 
+        %     fprintf("Movement Complete\n");
+        %     fprintf('\n');
+        % end
 
 
 
