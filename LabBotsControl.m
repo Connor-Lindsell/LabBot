@@ -175,23 +175,53 @@ classdef LabBotsControl
         
         function Move2Global(self, finishTr, robot)
     % Calculate the target orientation using RollPitchYawCalc
-    rpy = self.RollPitchYawCalc(finishTr);
+    [rpy, maskS2] = self.RollPitchYawCalc(finishTr);
     targetTransform = transl(finishTr) * rpy;
 
     % Display the target transform
-    fprintf('Target Transform (before RMRC):\n');
+    fprintf('Target Transform (before Position IK):\n');
     disp(targetTransform);
 
+    % Stage 1: Position IK
+    % Get initial guess based on quadrant
+    initialGuess = self.GetInitialGuess(finishTr);
+
+    % Define the mask for position only [111000]
+    maskS1 = [1 1 1 0 0 0];
+
+    % Solve inverse kinematics for position using the initial guess
+    qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', maskS1);
+
+    % Handle errors or failures in position IK
+    if isempty(qPos)
+        warning('Stage 1 IK failed to find a solution.');
+        return;
+    end
+
+    qPosAngles = rad2deg (qPos);
+
+    fprintf('qPos = \n');
+    fprintf('\n [');
+    fprintf('  %.5f  ', qPos);  % Display all joint angles in a row
+    fprintf(']\n');
+    fprintf('\n [');
+    fprintf('  %.5f  ', qPosAngles);  % Display all joint angles in a row
+    fprintf(']\n');
+    fprintf('\n');
+
+    fprintf('Stage 1 complete, starting RMRC for orientation and fine position...\n');
+
+    % Stage 2: RMRC for fine orientation and position adjustment
     % RMRC parameters
     deltaT = 0.05;   % Time step for RMRC
-    RMRCsteps = 1000;  % Increase steps for smoother movement
+    RMRCsteps = 10000; % Number of increments
 
-    % Get the initial configuration and current transform
-    startConfiguration = robot.model.getpos();
-    currentTransform = robot.model.fkine(startConfiguration);
+    % Get the initial configuration and current transform from Stage 1
+    currentConfig = qPos;  % Start from qPos from Stage 1
+    currentTransform = robot.model.fkine(currentConfig);
 
-    % Extract initial and target positions and rotations
-    initialPos = transl(currentTransform).';  % Convert to 3x1 vector
+    % Extract initial and target translation and rotation
+    initialPos = transl(currentTransform).';  % 3x1 vector
     targetPos = transl(targetTransform);      % 3x1 vector
     initialRot = t2r(currentTransform);       % 3x3 matrix
     targetRot = t2r(targetTransform);         % 3x3 matrix
@@ -199,46 +229,62 @@ classdef LabBotsControl
     % Linear interpolation for position increments
     deltaPos = (targetPos - initialPos) / RMRCsteps;
 
-    % Compute incremental rotation matrix
+    % Compute the incremental rotation matrix for each step
     deltaRot = (targetRot * initialRot')^(1 / RMRCsteps);  % Rotation increment
 
     % Initialize the current rotation matrix
     currentRot = initialRot;
-    qCurrent = startConfiguration;  % Start with the current configuration
 
     % RMRC loop over the given steps
     for i = 1:RMRCsteps
-        % Incrementally update position and orientation
+        % Update the position incrementally
         currentPos = initialPos + i * deltaPos;  % 3x1 vector
-        currentRot = deltaRot * currentRot;      % Maintain orthogonality
+
+        % Update the rotation incrementally using matrix multiplication
+        currentRot = deltaRot * currentRot;  % Maintain orthogonality
 
         % Construct the intermediate target transform
         intermediateTransform = rt2tr(currentRot, currentPos);
 
-        % Solve IK for the intermediate step using the previous configuration as the guess
-        qStep = robot.model.ikine(intermediateTransform, 'q0', qCurrent, ...
-                                  'mask', [1 1 1 1 1 1], 'tol', 1e-6, 'maxiter', 200);
+        % Check if the matrix becomes singular
+        if abs(det(intermediateTransform)) < 1e-10
+            warning('Matrix is singular or near-singular at step %d. Skipping this step.', i);
+            continue;
+        end
 
-        % Check if IK succeeded, if not, stop the movement
+        % Solve IK for the intermediate step using maskS2
+        qStep = robot.model.ikine(intermediateTransform, 'q0', currentConfig, 'mask', [1 1 1 1 1 1]);
+
+        % Handle IK failure
         if isempty(qStep)
             fprintf('RMRC failed at step %d\n', i);
             break;
         end
+
+        % % Check for joint limits
+        % qMin = robot.model.qlim(:, 1);  % Min joint limits
+        % qMax = robot.model.qlim(:, 2);  % Max joint limits
+        % if any(qStep < qMin) || any(qStep > qMax)
+        %     warning('Joint limits exceeded at step %d. Adjusting.', i);
+        %     qStep = min(max(qStep, qMin), qMax);  % Clamp values within joint limits
+        % end
+
+        % Debugging: Log RMRC progress
+        fprintf('RMRC Step %d: Current error: %.10f\n', i, norm(targetPos - currentPos));
 
         % Animate the robot to the new configuration
         robot.model.animate(qStep);
         drawnow();
         pause(deltaT);
 
-        % Update the configuration for the next step
-        qCurrent = qStep;
+        % Update the starting configuration for the next step
+        currentConfig = qStep;
     end
 
     fprintf("Movement Complete\n\n");
 end
 
-
-        
+       
 
 
         % function Move2Global(self, finishTr, robot)
@@ -333,7 +379,7 @@ end
         % Rutput:
         % rpy: the orientation of the end effector
 
-        function rpy = RollPitchYawCalc(self, finishTr)
+        function [rpy, maskS2] = RollPitchYawCalc(self, finishTr)
             % Extract X and Y coordinates of the finish transform
             x = finishTr(1);
             y = finishTr(2);
@@ -341,57 +387,70 @@ end
             % Default orientation: Z points in the positive X direction, Y remains vertical
             rpy = trotz(0) * troty(0);
             
+            % Initialize the maskS2 for orientation and fine position control
+            maskS2 = [1 1 1 1 1 1];  % Default mask includes both position and orientation
+        
             % Determine the quadrant and set the orientation using yaw (Z rotation) and pitch (Y rotation)
             if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
                 if x >= y
                     % Z points in the positive X direction
                     rpy = trotz(pi/2) * troty(pi/2);  
-                    disp("Quadrant 1, 1")
+                    maskS2 = [1 1 1 0 1 1];  % Example: prioritize orientation for yaw and pitch
+                    disp("Quadrant 1, 1 - MaskS2: [111011]");
                 else
                     % Z points in the positive Y direction
-                    rpy = trotx(-pi)*trotz(-pi/2);  
-                    disp("Quadrant 1, 2")
+                    rpy = trotx(-pi) * trotz(-pi/2);  
+                    maskS2 = [1 1 1 1 0 1];  % Example: prioritize yaw and roll
+                    disp("Quadrant 1, 2 - MaskS2: [111101]");
                 end
-
+        
             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
                 if abs(x) >= y
                     % Z points in the negative X direction
-                    rpy = trotx(-pi/2) * troty(-pi/2);  % Pitch up
-                    disp("Quadrant 2, 1")
+                    rpy = trotx(-pi/2) * troty(-pi/2);  
+                    maskS2 = [1 1 1 1 1 0];  % Example: control position with full orientation
+                    disp("Quadrant 2, 1 - MaskS2: [111110]");
                 else
                     % Z points in the positive Y direction
-                    rpy = trotx(pi)*trotz(-pi/2);  % Yaw to point along positive Y
-                    disp("Quadrant 2, 2")
+                    rpy = trotx(pi) * trotz(-pi/2);  
+                    maskS2 = [1 1 1 1 0 1];  % Control yaw, pitch, and roll
+                    disp("Quadrant 2, 2 - MaskS2: [111101]");
                 end
-
+        
             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
                 if abs(x) >= abs(y)
                     % Z points in the negative X direction
-                    rpy = trotz(pi) * troty(-pi/2);  % Pitch up
-                    disp("Quadrant 3, 1")
+                    rpy = trotz(pi) * troty(-pi/2);  
+                    maskS2 = [1 1 1 0 1 1];  % Control yaw and roll
+                    disp("Quadrant 3, 1 - MaskS2: [111011]");
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(pi/2);  % Yaw to point along negative Y
-                    disp("Quadrant 3, 2")
+                    rpy = trotz(pi/2);  
+                    maskS2 = [1 1 1 1 1 0];  % Full orientation and position control
+                    disp("Quadrant 3, 2 - MaskS2: [111110]");
                 end
-
+        
             else  % Fourth quadrant (X positive, Y negative)
                 if x >= abs(y)
                     % Z points in the positive X direction
-                    rpy = trotz(pi);  % Pitch up
-                    disp("Quadrant 4, 1")
+                    rpy = trotz(pi);  
+                    maskS2 = [1 1 1 0 1 1];  % Adjust yaw and roll
+                    disp("Quadrant 4, 1 - MaskS2: [111011]");
                 else
                     % Z points in the negative Y direction
-                    rpy = troty(pi/2) * trotz(pi/2);  % Yaw to point along negative Y
-                    disp("Quadrant 4, 2")
+                    rpy = troty(pi/2) * trotz(pi/2);  
+                    maskS2 = [1 1 1 1 1 0];  % Full control
+                    disp("Quadrant 4, 2 - MaskS2: [111110]");
                 end
             end
-
-            % Debug: Display the final rpy matrix
+        
+            % Debug: Display the final rpy matrix and maskS2
             disp("Final rpy matrix:");
             disp(rpy);
-
+            disp("MaskS2 for Stage 2:");
+            disp(maskS2);
         end
+
 
         %% Initial Guess for Ikine
         function initialGuess = GetInitialGuess(self, finishTr)
