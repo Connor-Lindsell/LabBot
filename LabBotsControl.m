@@ -198,7 +198,7 @@ classdef LabBotsControl
         return;
     end
 
-    qPosAngles = rad2deg (qPos);
+    qPosAngles = rad2deg(qPos);
 
     fprintf('qPos = \n');
     fprintf('\n [');
@@ -214,7 +214,7 @@ classdef LabBotsControl
     % Stage 2: RMRC for fine orientation and position adjustment
     % RMRC parameters
     deltaT = 0.05;   % Time step for RMRC
-    RMRCsteps = 10000; % Number of increments
+    RMRCsteps = 100; % Number of increments
 
     % Get the initial configuration and current transform from Stage 1
     currentConfig = qPos;  % Start from qPos from Stage 1
@@ -252,22 +252,14 @@ classdef LabBotsControl
             continue;
         end
 
-        % Solve IK for the intermediate step using maskS2
-        qStep = robot.model.ikine(intermediateTransform, 'q0', currentConfig, 'mask', [1 1 1 1 1 1]);
+        % Solve IK for the intermediate step using ikcon
+        qStep = robot.model.ikcon(intermediateTransform, currentConfig);
 
         % Handle IK failure
         if isempty(qStep)
             fprintf('RMRC failed at step %d\n', i);
             break;
         end
-
-        % % Check for joint limits
-        % qMin = robot.model.qlim(:, 1);  % Min joint limits
-        % qMax = robot.model.qlim(:, 2);  % Max joint limits
-        % if any(qStep < qMin) || any(qStep > qMax)
-        %     warning('Joint limits exceeded at step %d. Adjusting.', i);
-        %     qStep = min(max(qStep, qMin), qMax);  % Clamp values within joint limits
-        % end
 
         % Debugging: Log RMRC progress
         fprintf('RMRC Step %d: Current error: %.10f\n', i, norm(targetPos - currentPos));
