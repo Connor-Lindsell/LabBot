@@ -213,8 +213,10 @@ classdef LabBotsControl
 
     % Stage 2: RMRC for fine orientation and position adjustment
     % RMRC parameters
-    deltaT = 0.05;   % Time step for RMRC
-    RMRCsteps = 100; % Number of increments
+    deltaT = 0.02;  % Control frequency (time step for RMRC)
+    RMRCsteps = 500;  % Number of increments
+    epsilon = 0.1;  % Threshold for manipulability/Damped Least Squares
+    W = diag([1 1 1 0.1 0.1 0.1]);  % Weighting matrix for the velocity vector
 
     % Get the initial configuration and current transform from Stage 1
     currentConfig = qPos;  % Start from qPos from Stage 1
@@ -252,29 +254,48 @@ classdef LabBotsControl
             continue;
         end
 
-        % Solve IK for the intermediate step using ikcon
-        qStep = robot.model.ikcon(intermediateTransform, currentConfig);
+        % Compute the position error and orientation error
+        deltaX = targetPos - transl(currentTransform).';
+        Rd = targetRot;
+        Ra = t2r(currentTransform);
+        Rdot = (1 / deltaT) * (Rd - Ra);
+        S = Rdot * Ra';
 
-        % Handle IK failure
-        if isempty(qStep)
-            fprintf('RMRC failed at step %d\n', i);
-            break;
+        % Compute linear and angular velocities
+        linear_velocity = (1 / deltaT) * deltaX;
+        angular_velocity = [S(3, 2); S(1, 3); S(2, 1)];
+
+        % Compute end-effector velocity
+        xdot = W * [linear_velocity; angular_velocity];
+
+        % Compute Jacobian and manipulability
+        J = robot.model.jacob0(currentConfig);
+        m = sqrt(det(J * J'));
+        if m < epsilon
+            lambda = (1 - m / epsilon) * 5E-2;
+        else
+            lambda = 0;
         end
+        invJ = inv(J' * J + lambda * eye(6)) * J';
 
-        % Debugging: Log RMRC progress
-        fprintf('RMRC Step %d: Current error: %.10f\n', i, norm(targetPos - currentPos));
+        % Solve for the next joint velocities
+        qdot = (invJ * xdot).';
+
+        % Update joint configuration
+        currentConfig = currentConfig + deltaT * qdot;
 
         % Animate the robot to the new configuration
-        robot.model.animate(qStep);
+        robot.model.animate(currentConfig);
         drawnow();
         pause(deltaT);
 
-        % Update the starting configuration for the next step
-        currentConfig = qStep;
+        % Update the current transform for the next iteration
+        currentTransform = robot.model.fkine(currentConfig);
     end
 
     fprintf("Movement Complete\n\n");
 end
+
 
        
 
