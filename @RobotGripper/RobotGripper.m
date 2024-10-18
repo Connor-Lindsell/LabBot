@@ -1,7 +1,7 @@
 classdef RobotGripper < RobotBaseClass
     
     properties(Access = public)   
-        % plyFileNameStem = 'RobotGripper';
+        plyFileNameStem = 'RobotGripper';
         gripperState = 'Closed';  % Keep track of gripper's current state
     end
     
@@ -23,7 +23,7 @@ classdef RobotGripper < RobotBaseClass
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr;
             self.model.tool = self.toolTr;
-            % self.PlotAndColourRobot();
+            self.PlotAndColourRobot();
 
             drawnow
         end
