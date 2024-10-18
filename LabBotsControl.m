@@ -219,6 +219,12 @@ classdef LabBotsControl
         
             % Animate the robot moving to qPos
             for i = 1:numSteps
+                % Check for self-collision during the movement
+                if self.selfCollisionCheck(robot, qMatrix(i, :))
+                    warning('Self-collision detected! Stopping movement.');
+                    return;
+                end
+                
                 robot.model.animate(qMatrix(i, :));
                 drawnow();
                 pause(0.02);  % Adjust pause for speed of animation
@@ -262,6 +268,12 @@ classdef LabBotsControl
         
                 % Construct the intermediate target transform
                 intermediateTransform = rt2tr(currentRot, currentPos);
+        
+                % Check for self-collision during RMRC
+                if self.selfCollisionCheck(robot, currentConfig)
+                    warning('Self-collision detected during RMRC! Stopping movement.');
+                    return;
+                end
         
                 % Check if the matrix becomes singular
                 if abs(det(intermediateTransform)) < 1e-10
@@ -335,6 +347,7 @@ classdef LabBotsControl
             % Display movement complete
             fprintf("*********************************MOVEMENT COMPLETE*********************************\n\n");
         end
+
 
 
 
@@ -461,8 +474,12 @@ classdef LabBotsControl
         %% Collision Checking 
         % collision checking for the Robot arm 
         function isCollision = selfCollisionCheck(self, robot, q)
+            % Collision checking between non-adjacent links using ellipsoids
             % Assume initially no collision
             isCollision = false;
+            
+            % Define ellipsoid radii for each link (example values, adjust accordingly)
+            ellipsoidRadii = [0.1 0.05 0.05];  % radii for each ellipsoid
             
             % Get the number of links in the robot
             numLinks = robot.model.n;
@@ -470,29 +487,38 @@ classdef LabBotsControl
             % Calculate the transformation for each link
             linkTransforms = cell(1, numLinks);
             for i = 1:numLinks
-                linkTransforms{i} = robot.model.A(1:i, q);
+                linkTransforms{i} = robot.model.A(1:i, q);  % Forward kinematics of each link
             end
             
-            % Iterate over pairs of links to check for collisions
+            % Iterate over pairs of non-adjacent links to check for collisions
             for i = 1:numLinks
                 for j = i+2:numLinks  % Skip adjacent links
                     % Get the positions of the links as points (e.g., midpoints)
                     link1Pos = transl(linkTransforms{i}.T);
                     link2Pos = transl(linkTransforms{j}.T);
                     
-                    % Use a simple distance check for now
-                    distance = norm(link1Pos - link2Pos);
-                    if distance < 0.05  % Threshold for collision detection
+                    % Define ellipsoid center points
+                    centerPoint1 = link1Pos;
+                    centerPoint2 = link2Pos;
+                    
+                    % Check for intersection between two ellipsoids using algebraic distance
+                    algebraicDist = self.GetAlgebraicDist(centerPoint2, centerPoint1, ellipsoidRadii);
+                    
+                    if algebraicDist < 1  % If algebraic distance < 1, ellipsoids intersect
                         isCollision = true;
                         return;
                     end
                 end
             end
         end
-
-
-       
-
+        
+        % Helper function to compute algebraic distance for ellipsoid collision
+        function algebraicDist = GetAlgebraicDist(self, point, center, radii)
+            % Calculate the algebraic distance of a point to the surface of an ellipsoid
+            % centered at 'center' with 'radii'
+            diff = (point - center) ./ radii;  % Normalize the point relative to ellipsoid axes
+            algebraicDist = sum(diff .^ 2);
+        end
 
     
         %% Get End Effector Pos Function 
