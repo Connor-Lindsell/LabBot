@@ -224,7 +224,7 @@ classdef LabBotsControl
                 pause(0.02);  % Adjust pause for speed of animation
             end
         
-            fprintf('Stage 1 complete, starting RMRC for orientation and fine position...\n');
+            fprintf('Stage 1 complete, starting RMRC for orientation and fine position...\n\n');
         
             %% Stage 2: RMRC for fine orientation and position adjustment
             % RMRC parameters
@@ -361,44 +361,44 @@ classdef LabBotsControl
                 if x >= y
                     % Z points in the positive X direction
                     rpy = trotz(pi/2) * troty(pi/2);  
-                    disp("Quadrant 1 (Positive X Positive Y), Segment 1 (X Direction)");
+                    disp("Quadrant 1 (Positive X Positive Y), Segment 1 (X Direction)\n");
                 else
                     % Z points in the positive Y direction
                     rpy = trotx(-pi) * trotz(-pi/2);  
-                    disp("Quadrant 1 (Positive X Positive Y), Segment 2 (Y Direction)");
+                    disp("Quadrant 1 (Positive X Positive Y), Segment 2 (Y Direction)\n");
                 end
         
             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
                 if abs(x) >= y
                     % Z points in the negative X direction
                     rpy = trotx(-pi/2) * troty(-pi/2);  
-                    disp("Quadrant 2 (Negative X Positive Y), Segment 1 (-X Direction)");
+                    disp("Quadrant 2 (Negative X Positive Y), Segment 1 (-X Direction)\n");
                 else
                     % Z points in the positive Y direction
                     rpy = trotx(pi) * trotz(-pi/2);  
-                    disp("Quadrant 2 (Negative X Positive Y), Segment 2 (Y Direction)");
+                    disp("Quadrant 2 (Negative X Positive Y), Segment 2 (Y Direction)\n");
                 end
         
             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
                 if abs(x) >= abs(y)
                     % Z points in the negative X direction
                     rpy = trotz(pi) * troty(-pi/2);  
-                    disp("Quadrant 3 (Negative X Negative Y), Segment 1 (-X Direction)");
+                    disp("Quadrant 3 (Negative X Negative Y), Segment 1 (-X Direction)\n");
                 else
                     % Z points in the negative Y direction
                     rpy = trotz(pi/2);  
-                    disp("Quadrant 3 (Negative X Negative Y), Segment 2 (-Y Direction)");
+                    disp("Quadrant 3 (Negative X Negative Y), Segment 2 (-Y Direction)\n");
                 end
         
             else  % Fourth quadrant (X positive, Y negative)
                 if x >= abs(y)
                     % Z points in the positive X direction
                     rpy = trotz(pi);  
-                    disp("Quadrant 4 (Positive X Negative Y), Segment 1 (X Direction)");
+                    disp("Quadrant 4 (Positive X Negative Y), Segment 1 (X Direction)\n");
                 else
                     % Z points in the negative Y direction
                     rpy = troty(pi/2) * trotz(pi/2);  
-                    disp("Quadrant 4 (Positive X Negative Y), Segment 2 (-Y Direction)");
+                    disp("Quadrant 4 (Positive X Negative Y), Segment 2 (-Y Direction)\n");
                 end
             end
         
