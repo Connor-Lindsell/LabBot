@@ -35,7 +35,7 @@ classdef LabBotsControl
 
             % Temorary Enviorment 
             % Configure the axes and labels for the environment
-            axis([-1.6 1.6 -1 1 0 1.5]);  % Set the axis limits to fit all objects in the environment
+            axis([-1 1 -1 1 0 1]);  % Set the axis limits to fit all objects in the environment
             xlabel('X-axis');  % Label the X-axis
             ylabel('Y-axis');  % Label the Y-axis
             zlabel('Z-axis');  % Label the Z-axis
@@ -78,23 +78,22 @@ classdef LabBotsControl
             % self.Move2Global(LabBot_Pos1, LabBot_End, rLabBot);             
 
             %% Mix Chemicals 
-
             % Not nessecary while testing optimisation 
-            % % Define chemicals to mix and their test tube locations
-            % chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
-            %                   {'Iodine', 2}, ... 
-            %                   {'Nitrogen', 4} ...
-            %                   };
-            % 
-            % % Call MixChem with 3 chemicals and mixing location 3
-            % MixChem(self, 3, chemicals2mix1, 3)
-            % 
-            % chemicals2mix2 = {{'New Mixture', 3}, ... 
-            %                   {'Nitrogen', 4} ...
-            %                   };
-            % 
-            % % Call MixChem with 2 chemicals and mixing location 5
-            % MixChem(self, 2, chemicals2mix2, 5)
+            % Define chemicals to mix and their test tube locations
+            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
+                              {'Iodine', 2}, ... 
+                              {'Nitrogen', 4} ...
+                              };
+
+            % Call MixChem with 3 chemicals and mixing location 3
+            MixChem(self, 3, chemicals2mix1, 3)
+
+            chemicals2mix2 = {{'New Mixture', 3}, ... 
+                              {'Nitrogen', 4} ...
+                              };
+
+            % Call MixChem with 2 chemicals and mixing location 5
+            MixChem(self, 2, chemicals2mix2, 5)
                     
         end
 
@@ -111,11 +110,11 @@ classdef LabBotsControl
         
         function MixChem(self, numOfChem, chem2mix, mixingLocation)
             % Define test tube locations (you could adjust this as per your environment)
-            testTubeLocation = {[0.2, 0.21, 0.2], ...
-                                [0.2, 0.22, 0.2], ...
-                                [0.2, 0.23, 0.2], ...
-                                [0.2, 0.24, 0.2], ...
-                                [0.2, 0.25, 0.2]};
+            testTubeLocation = {[0.2, -0.2, 0.2], ...
+                                [0.2, -0.1, 0.2], ...
+                                [0.2, 0, 0.2], ...
+                                [0.2, 0.1, 0.2], ...
+                                [0.2, 0.2, 0.2]};
                             
             % Iterate over the number of chemicals to mix
             for i = 1:numOfChem
