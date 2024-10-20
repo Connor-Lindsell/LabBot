@@ -440,7 +440,16 @@ classdef LabBotsControl
         end
 
 
-        %% Initial Guess for Ikine
+        %% Initial Guess for Inverse Kinematics
+        % Calculates the Initial guess for the ikine function based of the 
+        % end effector position in relation to the origin of the robot
+        %
+        % Input:
+        % FinishTr: the end location of the robot end effector 
+        % 
+        % Output:
+        % initialGuess: the initial guess for the inverse kinematics
+        
         function initialGuess = GetInitialGuess(self, finishTr)
             % Extract X and Y coordinates of the finish transform
             x = finishTr(1);
