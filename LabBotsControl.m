@@ -342,7 +342,7 @@ classdef LabBotsControl
             fprintf('Final Roll, Pitch, Yaw (degrees) = \n');
             fprintf('Roll: %.5f  Pitch: %.5f  Yaw: %.5f\n\n', finalRPYDegrees(1), finalRPYDegrees(2), finalRPYDegrees(3));
         
-            pause(1);
+            % pause(1);
         
             % Display movement complete
             fprintf("*********************************MOVEMENT COMPLETE*********************************\n\n");
@@ -373,44 +373,66 @@ classdef LabBotsControl
             if x >= 0 && y >= 0  % First quadrant (both X and Y are positive)
                 if x >= y
                     % Z points in the positive X direction
-                    rpy = trotz(pi/2) * troty(pi/2);  
+                    rpy = trotx(0) * troty(pi/2) * trotz(pi/2);  
                     disp("Quadrant 1 (Positive X Positive Y), Segment 1 (X Direction)\n");
                 else
                     % Z points in the positive Y direction
-                    rpy = trotx(-pi) * trotz(-pi/2);  
+
+                    % This should be the correct rotation
+                    % rpy = trotx(-pi) * troty(0) * trotz(-pi/2);  
+
+                    % This is the correct rotation according to trial and error
+                    rpy = trotx(-pi/2) * troty(0) * trotz(pi);
+
                     disp("Quadrant 1 (Positive X Positive Y), Segment 2 (Y Direction)\n");
                 end
         
             elseif x < 0 && y >= 0  % Second quadrant (X negative, Y positive)
                 if abs(x) >= y
                     % Z points in the negative X direction
-                    rpy = trotx(-pi/2) * troty(-pi/2);  
+
+                    % This should be the correct rotation
+                    % rpy = trotx(-pi/2) * troty(-pi/2) * trotz(0);  
+
+                    % This is the correct rotation according to trial and error
+                    rpy = trotx(-pi/2) * troty(-pi/2) * trotz(pi);
+
                     disp("Quadrant 2 (Negative X Positive Y), Segment 1 (-X Direction)\n");
                 else
                     % Z points in the positive Y direction
-                    rpy = trotx(pi) * trotz(-pi/2);  
+                    % This should be the correct rotation
+                    % rpy = trotx(pi) * troty(0) * trotz(-pi/2);   
+
+                    % This is the correct rotation according to trial and error
+                    rpy = trotx(-pi/2) * troty(0) * trotz(-pi);  
                     disp("Quadrant 2 (Negative X Positive Y), Segment 2 (Y Direction)\n");
                 end
         
             elseif x < 0 && y < 0  % Third quadrant (both X and Y are negative)
                 if abs(x) >= abs(y)
                     % Z points in the negative X direction
-                    rpy = trotz(pi) * troty(-pi/2);  
+
+                    % This should be the correct rotation
+                    % rpy = trotx(0) * troty(-pi/2) * trotz(pi/2);  
+
+                    % This is the correct rotation according to trial and error
+                    rpy = trotx(pi) * troty(-pi/2) * trotz(pi/2);  
+
                     disp("Quadrant 3 (Negative X Negative Y), Segment 1 (-X Direction)\n");
                 else
                     % Z points in the negative Y direction
-                    rpy = trotz(pi/2);  
+                    rpy = trotx(pi/2) * troty(0) * trotz(0);  
                     disp("Quadrant 3 (Negative X Negative Y), Segment 2 (-Y Direction)\n");
                 end
         
             else  % Fourth quadrant (X positive, Y negative)
                 if x >= abs(y)
                     % Z points in the positive X direction
-                    rpy = trotz(pi);  
+                    rpy = trotx(pi/2) * troty(pi/2) * trotz(0);  
                     disp("Quadrant 4 (Positive X Negative Y), Segment 1 (X Direction)\n");
                 else
                     % Z points in the negative Y direction
-                    rpy = troty(pi/2) * trotz(pi/2);  
+                    rpy = trotx(pi/2) * troty(0) * trotz(0);  
                     disp("Quadrant 4 (Positive X Negative Y), Segment 2 (-Y Direction)\n");
                 end
             end
