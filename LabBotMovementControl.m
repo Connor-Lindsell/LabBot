@@ -336,5 +336,54 @@ classdef LabBotMovementControl
                 end
              end 
         end
+
+        %% Collision Checking 
+        % collision checking for the Robot arm 
+        function isCollision = selfCollisionCheck(self, robot, q)
+            % Collision checking between non-adjacent links using ellipsoids
+            % Assume initially no collision
+            isCollision = false;
+            
+            % Define ellipsoid radii for each link (example values, adjust accordingly)
+            ellipsoidRadii = [0.1 0.05 0.05];  % radii for each ellipsoid
+            
+            % Get the number of links in the robot
+            numLinks = robot.model.n;
+            
+            % Calculate the transformation for each link
+            linkTransforms = cell(1, numLinks);
+            for i = 1:numLinks
+                linkTransforms{i} = robot.model.A(1:i, q);  % Forward kinematics of each link
+            end
+            
+            % Iterate over pairs of non-adjacent links to check for collisions
+            for i = 1:numLinks
+                for j = i+2:numLinks  % Skip adjacent links
+                    % Get the positions of the links as points (e.g., midpoints)
+                    link1Pos = transl(linkTransforms{i}.T);
+                    link2Pos = transl(linkTransforms{j}.T);
+                    
+                    % Define ellipsoid center points
+                    centerPoint1 = link1Pos;
+                    centerPoint2 = link2Pos;
+                    
+                    % Check for intersection between two ellipsoids using algebraic distance
+                    algebraicDist = self.GetAlgebraicDist(centerPoint2, centerPoint1, ellipsoidRadii);
+                    
+                    if algebraicDist < 1  % If algebraic distance < 1, ellipsoids intersect
+                        isCollision = true;
+                        return;
+                    end
+                end
+            end
+        end
+        
+        % Helper function to compute algebraic distance for ellipsoid collision
+        function algebraicDist = GetAlgebraicDist(self, point, center, radii)
+            % Calculate the algebraic distance of a point to the surface of an ellipsoid
+            % centered at 'center' with 'radii'
+            diff = (point - center) ./ radii;  % Normalize the point relative to ellipsoid axes
+            algebraicDist = sum(diff .^ 2);
+        end
     end
 end

@@ -3,7 +3,7 @@ classdef LabBotMainControl
     properties 
         % Objects of Parent classes
         movementController
-        enviorment
+        enviornment
 
         % Initialise Robot models variables
         rUR3
@@ -15,7 +15,7 @@ classdef LabBotMainControl
         function obj = LabBotMainControl
             % Initialise Parent classes 
             obj.movementController = LabBotMovementControl();
-            obj.enviorment = LabBotEnviorment();
+            obj.enviornment = LabBotEnviornment();
 
             % Call SimultaneousControl
             obj.DemonstrationControl();
@@ -40,11 +40,13 @@ classdef LabBotMainControl
         %% Demonstration of Robot Control
         function DemonstrationControl(obj)
             clf;
-
             %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
             self.rLabBot = LabBot_7DOF;
+           
+            %% Initialisation of Enviorment 
+            obj.enviornment.InitialiseEnviorment();
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
