@@ -8,6 +8,9 @@ classdef LabBotMainControl
         % Initialise Robot models variables
         rUR3
         rLabBot
+
+        % Initialise GUI 
+        guiApp
     end 
 
     %% Constructor method
@@ -20,6 +23,9 @@ classdef LabBotMainControl
             % Call SimultaneousControl
             obj.DemonstrationControl();
 
+            % Call GUI interface
+            obj.GUI_InterfaceControl();
+
         end
     end 
 
@@ -27,15 +33,56 @@ classdef LabBotMainControl
     methods 
         %% Control Through GUI Interface
         function GUI_InterfaceControl(obj)
-            % Implement functions to call 
-
-            % Call Mix Chem
-
-            % Call Cartesian movement
-
-            % Call Joint Movement
+            % Start GUI and environment, but wait for the On switch to enable controls
+        
+            % Create the GUI
+            obj.guiApp = GUI();
+            
+            % Initially disable interactive controls (sliders, etc.)
+            obj.disableControls();
+            
+            % Initialize the environment
+            disp('Initializing environment...');
+            obj.enviornment.initializeEnvironment();  % Add logic to initialize the environment
+            
+            % Wait for the "On" switch to enable controls
+            disp('Waiting for On switch...');
         end
 
+        % Function to disable all interactive controls in the GUI
+        function disableControls(obj)
+            % Disable all sliders and buttons
+            obj.guiApp.Joint1Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint2Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint3Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint4Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint5Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint6Slider_LabBot.Enable = 'off';
+            obj.guiApp.Joint7Slider_LabBot.Enable = 'off';
+
+            % Similarly disable sliders for UR3 if applicable
+        end
+
+        % Function to enable all interactive controls in the GUI
+        function enableControls(obj)
+            % Enable all sliders and buttons
+            obj.guiApp.Joint1Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint2Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint3Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint4Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint5Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint6Slider_LabBot.Enable = 'on';
+            obj.guiApp.Joint7Slider_LabBot.Enable = 'on';
+
+            % Similarly enable sliders for UR3 if applicable
+        end
+
+        % This function will handle the movement of joints, which is called by the sliders
+        function JointMovement(obj, robot, joint, angle)
+            fprintf('Moving Joint %d of robot to %.2f degrees\n', joint, angle);
+            % Logic to move the robot joint goes here
+        end
+        
 
         %% Demonstration of Robot Control
         function DemonstrationControl(obj)
