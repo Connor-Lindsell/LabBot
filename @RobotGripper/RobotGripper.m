@@ -1,7 +1,7 @@
 classdef RobotGripper < RobotBaseClass
     
     properties(Access = public)   
-        plyFileNameStem = 'RobotGripper';
+        % plyFileNameStem = 'RobotGripper';
         gripperState = 'Closed';  % Keep track of gripper's current state
     end
     

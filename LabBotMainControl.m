@@ -23,7 +23,7 @@ classdef LabBotMainControl
             obj.GUI_Func = GUI_Functions ();
 
             % Call SimultaneousControl
-            obj.DemonstrationControl();
+            % obj.DemonstrationControl();
 
             % Call GUI interface
             obj.GUI_InterfaceControl();
@@ -38,20 +38,93 @@ classdef LabBotMainControl
             % Start GUI and environment, but wait for the On switch to enable controls
         
             % Create the GUI
-            obj.guiApp = GUI();
-            
-            % Initially disable interactive controls (sliders, etc.)
+            obj.guiApp = GUI();  % Start GUI
+
+            % Initially disable the interactive controls (sliders, etc.)
             obj.GUI_Func.disableControls();
             
+            %% Environment not working 
             % Initialize the environment
-            disp('Initializing environment...');
-            obj.enviornment.initializeEnvironment();  % Add logic to initialize the environment
+            % disp('Initializing environment...');
+            % obj.enviornment.InitialiseEnviorment();  % Logic to initialize the environment
+
+            %% Set Up Enviorment 
+
+            % Call Enviorment class here
+
+            % Temporary Enviorment 
+            % Configure the axes and labels for the environment
+            axis([-2 2 -2 2 0 2]);  % Set the axis limits to fit all objects in the environment
+            xlabel('X-axis');  % Label the X-axis
+            ylabel('Y-axis');  % Label the Y-axis
+            zlabel('Z-axis');  % Label the Z-axis
+            grid on;  % Display a grid for better visualization of object positions
+            hold on;  % Keep the plot active for additional elements
             
+            %% Robot Initialisation
+            % Initaialising Robot Models
+            self.rUR3 = UR3;
+            self.rLabBot = LabBot_7DOF;
+
+            %% Base transforms
+            UR3baseTr = transl(0,0,0);
+            LabBotbaseTr = transl(2,2,0);
+
+            self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
+            self.rUR3.model.base = self.rUR3.model.base.T * LabBotbaseTr;
+
+
+            %%
+
             % Wait for the "On" switch to enable controls
             disp('Waiting for On switch...');
-            
+
+            % Add listener for the switch (on/off control)
+            addlistener(obj.guiApp.Switch, 'ValueChanged', @(src, event) obj.toggleControl(src, event));
+
+            % Add listeners to the sliders for real-time joint control
+            addlistener(obj.guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            addlistener(obj.guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
+
+            % Similarly, add listeners for UR3 joint sliders
+            addlistener(obj.guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+            addlistener(obj.guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
+
+            % Add listeners for edit fields (for joint control using values)
+            addlistener(obj.guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            addlistener(obj.guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+
+            % Let the GUI remain interactive while the event loop continues to run
+            disp('GUI initialized. You can now control the robot using the sliders.');
+
+            % Wait for the GUI to be closed
+            uiwait(obj.guiApp.UIFigure);
         end
 
+        % Toggle the control based on the switch state (on/off)
+        function toggleControl(obj, src, event)
+            if strcmp(src.Value, 'On')
+                obj.GUI_Func.enableControls();  % Enable the control
+                disp('Controls enabled.');
+            else
+                obj.GUI_Func.disableControls();  % Disable the control
+                disp('Controls disabled.');
+            end
+        end
+
+        % Called when a slider is moved (for joint control)
+        function jointSliderMoved(obj, robotName, jointIndex, value)
+            if obj.GUI_Func.controlEnabled
+                if strcmp(robotName, 'LabBot')
+                    obj.GUI_Func.JointMovement(obj.GUI_Func.rLabBot, jointIndex, value);
+                elseif strcmp(robotName, 'UR3')
+                    obj.GUI_Func.JointMovement(obj.GUI_Func.rUR3, jointIndex, value);
+                end
+            else
+                disp('Control is disabled. Please turn the switch on.');
+            end
+        end
+   
                 
 
         %% Demonstration of Robot Control
@@ -115,8 +188,9 @@ classdef LabBotMainControl
                               };
 
             % Call MixChem with 2 chemicals and mixing location 5
-            MixChem(self, 2, chemicals2mix2, 5)
+            obj.GUI_Func.MixChem(self, 2, chemicals2mix2, 5)
                     
         end
     end
 end
+ 
