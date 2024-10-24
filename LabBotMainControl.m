@@ -5,6 +5,7 @@ classdef LabBotMainControl
         movementController
         enviornment
         GUI_Func
+        wrkspaceCalc
 
         % Initialise Robot models variables
         rUR3
@@ -21,6 +22,7 @@ classdef LabBotMainControl
             obj.movementController = LabBotMovementControl();
             obj.enviornment = LabBotEnviornment();
             obj.GUI_Func = GUI_Functions ();
+            obj.wrkspaceCalc = LabBotCalculations ();
 
             % Call SimultaneousControl
             % obj.DemonstrationControl();
@@ -150,6 +152,15 @@ classdef LabBotMainControl
             % Call MixChem with 2 chemicals and mixing location 5
             obj.GUI_Func.MixChem(self, 2, chemicals2mix2, 5)
                     
+        end
+
+        function WorkspaceCalculation(obj)
+            %% Initialisation of Enviorment 
+            obj.enviornment.InitialiseEnviorment();
+
+            %% Workspace Calculation 
+            obj.wrkspaceCalc.WorkspaceCalc();
+
         end
     end
 end
