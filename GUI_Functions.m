@@ -22,14 +22,42 @@ classdef GUI_Functions
    
     %% Functions
     methods 
-        % Enable control
-        function EnableControl(obj)
-            obj.controlEnabled = true;
-        end
+        % Add all listeners for sliders, edit fields, and switch in the GUI
+        function addListeners(obj, guiApp)
+            % Add listener for the switch (on/off control)
+            addlistener(guiApp.Switch, 'ValueChanged', @(src, event) obj.toggleControl(src, event));
 
-        % Disable control
-        function DisableControl(obj)
-            obj.controlEnabled = false;
+            % Add listeners to the LabBot sliders for real-time joint control
+            addlistener(guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            addlistener(guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
+            addlistener(guiApp.Joint3Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
+            addlistener(guiApp.Joint4Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
+            addlistener(guiApp.Joint5Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
+            addlistener(guiApp.Joint6Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
+            
+            % Similarly, add listeners for UR3 joint sliders
+            addlistener(guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+            addlistener(guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
+            addlistener(guiApp.Joint3Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
+            addlistener(guiApp.Joint4Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
+            addlistener(guiApp.Joint5Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
+            addlistener(guiApp.Joint6Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
+
+            % Add listeners for LabBot edit fields (for joint control using values)
+            addlistener(guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
+
+            % Add listeners for UR3 edit fields
+            addlistener(guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+            addlistener(guiApp.EditField_UR3Joint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
+            addlistener(guiApp.EditField_UR3Joint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
+            addlistener(guiApp.EditField_UR3Joint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
+            addlistener(guiApp.EditField_UR3Joint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
+            addlistener(guiApp.EditField_UR3Joint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
         end
 
         %% Joint Movement with Integrated Jogging and DLS
@@ -76,6 +104,7 @@ classdef GUI_Functions
             end
         end
 
+        %%
         % Disable controls (called when switch is off)
         function disableControls(obj)
             obj.controlEnabled = false;
@@ -84,6 +113,32 @@ classdef GUI_Functions
         % Enable controls (called when switch is on)
         function enableControls(obj)
             obj.controlEnabled = true;
+        end
+
+        %%
+        % Toggle the control based on the switch state (on/off)
+        function toggleControl(obj, src, event)
+            if strcmp(src.Value, 'On')
+                obj.enableControls();  % Enable the control
+                disp('Controls enabled.');
+            else
+                obj.disableControls();  % Disable the control
+                disp('Controls disabled.');
+            end
+        end
+
+        %%
+        % Called when a slider is moved (for joint control)
+        function jointSliderMoved(obj, robotName, jointIndex, value)
+            if obj.controlEnabled
+                if strcmp(robotName, 'LabBot')
+                    obj.JointMovement(obj.rLabBot, jointIndex, value);
+                elseif strcmp(robotName, 'UR3')
+                    obj.JointMovement(obj.rUR3, jointIndex, value);
+                end
+            else
+                disp('Control is disabled. Please turn the switch on.');
+            end
         end
 
 

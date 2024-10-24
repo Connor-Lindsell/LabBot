@@ -76,54 +76,14 @@ classdef LabBotMainControl
 
             %%
 
-            % Wait for the "On" switch to enable controls
-            disp('Waiting for On switch...');
-
-            % Add listener for the switch (on/off control)
-            addlistener(obj.guiApp.Switch, 'ValueChanged', @(src, event) obj.toggleControl(src, event));
-
-            % Add listeners to the sliders for real-time joint control
-            addlistener(obj.guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(obj.guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
-
-            % Similarly, add listeners for UR3 joint sliders
-            addlistener(obj.guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-            addlistener(obj.guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
-
-            % Add listeners for edit fields (for joint control using values)
-            addlistener(obj.guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(obj.guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-
-            % Let the GUI remain interactive while the event loop continues to run
-            disp('GUI initialized. You can now control the robot using the sliders.');
+            % Add all listeners for the GUI elements in the GUI_Functions class
+            obj.GUI_Func.addListeners(obj.guiApp);
 
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
         end
 
-        % Toggle the control based on the switch state (on/off)
-        function toggleControl(obj, src, event)
-            if strcmp(src.Value, 'On')
-                obj.GUI_Func.enableControls();  % Enable the control
-                disp('Controls enabled.');
-            else
-                obj.GUI_Func.disableControls();  % Disable the control
-                disp('Controls disabled.');
-            end
-        end
-
-        % Called when a slider is moved (for joint control)
-        function jointSliderMoved(obj, robotName, jointIndex, value)
-            if obj.GUI_Func.controlEnabled
-                if strcmp(robotName, 'LabBot')
-                    obj.GUI_Func.JointMovement(obj.GUI_Func.rLabBot, jointIndex, value);
-                elseif strcmp(robotName, 'UR3')
-                    obj.GUI_Func.JointMovement(obj.GUI_Func.rUR3, jointIndex, value);
-                end
-            else
-                disp('Control is disabled. Please turn the switch on.');
-            end
-        end
+        
    
                 
 
