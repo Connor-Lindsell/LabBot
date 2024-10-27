@@ -5,8 +5,8 @@ classdef LabBotEnvironment < handle
         Beaker;
         Table;
         Cube;
-        rUR3
-        rLabBot
+        rUR3;
+        rLabBot;
     end
     
     methods
@@ -23,7 +23,7 @@ classdef LabBotEnvironment < handle
    %% Object Initialiastion         
             
         self.Table = Table;
-        self.Beaker = Beaker();
+        self.Beaker = Beaker(1,0.5,2);
         self.Conical = Conical(-1,0.5,2);
         % self.Cube = Cube;
 

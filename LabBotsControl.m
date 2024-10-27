@@ -35,7 +35,7 @@ classdef LabBotsControl
 
             % Temorary Enviorment 
             % Configure the axes and labels for the environment
-            axis([-1 1 -1 1 0 1]);  % Set the axis limits to fit all objects in the environment
+            axis([-10 10 -10 10 0 10]);  % Set the axis limits to fit all objects in the environment
             xlabel('X-axis');  % Label the X-axis
             ylabel('Y-axis');  % Label the Y-axis
             zlabel('Z-axis');  % Label the Z-axis

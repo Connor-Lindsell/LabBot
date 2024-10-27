@@ -25,10 +25,10 @@ classdef LabBotMainControl
             obj.wrkspaceCalc = LabBotCalculations ();
 
             % Call SimultaneousControl
-            % obj.DemonstrationControl();
+            obj.DemonstrationControl();
 
             % Call GUI interface
-            obj.GUI_InterfaceControl();
+            % obj.GUI_InterfaceControl();
 
         end
     end 
@@ -65,14 +65,14 @@ classdef LabBotMainControl
             % 
             % %% Robot Initialisation
             % % Initaialising Robot Models
-            % self.rUR3 = UR3;
+            self.rUR3 = UR3;
             % self.rLabBot = LabBot_7DOF;
             % 
             % %% Base transforms
-            % UR3baseTr = transl(0,0,1);
+            UR3baseTr = transl(0,0,1);
             % LabBotbaseTr = transl(2,2,0);
-            % 
-            % self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
+
+            self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
             % self.rUR3.model.base = self.rUR3.model.base.T * LabBotbaseTr;
 
 
@@ -95,10 +95,10 @@ classdef LabBotMainControl
             %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
-            self.rLabBot = LabBot_7DOF;
+            % self.rLabBot = LabBot_7DOF;
            
             %% Initialisation of Enviorment 
-            obj.environment.InitialiseEnviorment();
+            obj.environment.InitialiseEnvironment();
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
@@ -130,27 +130,29 @@ classdef LabBotMainControl
             obj.movementController.Move2Global(UR3_Pos8, self.rUR3);
 
             
+
+            
             % For LabBot
-            obj.movementController.Move2Global(LabBot_Pos1, self.rLabBot);
-            obj.movementController.Move2Global(LabBot_End, self.rLabBot);             
+            % obj.movementController.Move2Global(LabBot_Pos1, self.rLabBot);
+            % obj.movementController.Move2Global(LabBot_End, self.rLabBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 
             % Define chemicals to mix and their test tube locations
-            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
-                              {'Iodine', 2}, ... 
-                              {'Nitrogen', 4} ...
-                              };
-
-            % Call MixChem with 3 chemicals and mixing location 3
-            MixChem(self, 3, chemicals2mix1, 3)
-
-            chemicals2mix2 = {{'New Mixture', 3}, ... 
-                              {'Nitrogen', 4} ...
-                              };
-
-            % Call MixChem with 2 chemicals and mixing location 5
-            obj.GUI_Func.MixChem(self, 2, chemicals2mix2, 5)
+            % chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
+            %                   {'Iodine', 2}, ... 
+            %                   {'Nitrogen', 4} ...
+            %                   };
+            % 
+            % % Call MixChem with 3 chemicals and mixing location 3
+            % MixChem(self, 3, chemicals2mix1, 3)
+            % 
+            % chemicals2mix2 = {{'New Mixture', 3}, ... 
+            %                   {'Nitrogen', 4} ...
+            %                   };
+            % 
+            % % Call MixChem with 2 chemicals and mixing location 5
+            % obj.GUI_Func.MixChem(self, 2, chemicals2mix2, 5)
                     
         end
 
