@@ -22,14 +22,16 @@ classdef GUI_Functions
    
     %% Functions
     methods 
-        % Enable control method
+         % Enable control method
         function enableControl(obj)
             obj.controlEnabled = true;
+            disp('Control enabled in GUI_Functions');
         end
 
         % Disable control method
         function disableControl(obj)
             obj.controlEnabled = false;
+            disp('Control disabled in GUI_Functions');
         end
 
         %% Joint Movement with Integrated Jogging and DLS
@@ -47,6 +49,9 @@ classdef GUI_Functions
             end
 
             if obj.controlEnabled
+
+                disp(['Moving joint ', num2str(joint), ' for ', robotName]);
+
                 % Read the current joint configuration
                 currentQ = robot.getpos();
                 
