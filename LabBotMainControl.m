@@ -25,10 +25,10 @@ classdef LabBotMainControl
             obj.wrkspaceCalc = LabBotCalculations ();
 
             % Call SimultaneousControl
-            % obj.DemonstrationControl();
+            obj.DemonstrationControl();
 
             % Call GUI interface
-            obj.GUI_InterfaceControl();
+            % obj.GUI_InterfaceControl();
 
         end
     end 
@@ -64,26 +64,26 @@ classdef LabBotMainControl
             %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
-            self.rLabBot = LabBot_7DOF;
+            % self.rLabBot = LabBot_7DOF;
            
             %% Initialisation of Enviorment 
-            obj.environment.InitialiseEnviorment();
+            obj.environment.InitialiseEnvironment();
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
             % Cheecking for correct orientation
-            UR3_Pos1 = [0.3,0.2,0.2]; % positive x Q++
-            UR3_Pos2 = [-0.3,0.2,0.2]; % negative x Q-+
-            UR3_Pos3 = [0.2,0.3,0.2]; % positive y Q++
-            UR3_Pos4 = [0.2,-0.3,0.2]; % negative y Q+-
-            UR3_Pos5 = [0.3,-0.2,0.2]; % positive x Q+-
-            UR3_Pos6 = [-0.3,-0.2,0.2]; % negative x Q--
-            UR3_Pos7 = [-0.2,0.3,0.2]; % positive y Q-+
-            UR3_Pos8 = [-0.2,-0.3,0.2]; % negative y Q--
+            UR3_Pos1 = [0.3,0.2,2.2]; % positive x Q++
+            UR3_Pos2 = [-0.3,0.2,2.2]; % negative x Q-+
+            UR3_Pos3 = [0.2,0.3,2.2]; % positive y Q++
+            UR3_Pos4 = [0.2,-0.3,2.2]; % negative y Q+-
+            UR3_Pos5 = [0.3,-0.2,2.2]; % positive x Q+-
+            UR3_Pos6 = [-0.3,-0.2,2.2]; % negative x Q--
+            UR3_Pos7 = [-0.2,0.3,2.2]; % positive y Q-+
+            UR3_Pos8 = [-0.2,-0.3,2.2]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
-            LabBot_Pos1 = [0.2,0.2,0.2];
-            LabBot_End = [0.2,0.2,0.2];
+            % LabBot_Pos1 = [0.2,0.2,0.2];
+            % LabBot_End = [0.2,0.2,0.2];
 
 
             %% Perform Movements
@@ -100,8 +100,8 @@ classdef LabBotMainControl
 
             
             % For LabBot
-            obj.movementController.Move2Global(LabBot_Pos1, self.rLabBot);
-            obj.movementController.Move2Global(LabBot_End, self.rLabBot);             
+            % obj.movementController.Move2Global(LabBot_Pos1, self.rLabBot);
+            % obj.movementController.Move2Global(LabBot_End, self.rLabBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 

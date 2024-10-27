@@ -30,7 +30,7 @@ classdef LabBotEnvironment < handle
     % Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
-            self.rLabBot = LabBot_7DOF;
+            % self.rLabBot = LabBot_7DOF;
 
     %% Base transforms
             % UR3baseTr = transl(0,0,2);

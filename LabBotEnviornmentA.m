@@ -1,4 +1,4 @@
-classdef LabBotEnviornment
+classdef LabBotEnviornmentA
     %% Properties
     properties 
         % Initialise Robot models variables
