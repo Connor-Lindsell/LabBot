@@ -22,10 +22,12 @@ classdef GUI_Functions
    
     %% Functions
     methods 
+
          % Enable control method
         function enableControl(obj)
             obj.controlEnabled = true;
             disp('Control enabled in GUI_Functions');
+
         end
 
         % Disable control method

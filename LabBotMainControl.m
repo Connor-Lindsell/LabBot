@@ -3,7 +3,7 @@ classdef LabBotMainControl
     properties 
         % Objects of Parent classes
         movementController
-        enviornment
+        environment
         GUI_Func
         wrkspaceCalc
 
@@ -20,7 +20,7 @@ classdef LabBotMainControl
         function obj = LabBotMainControl
             % Initialise Parent classes 
             obj.movementController = LabBotMovementControl();
-            obj.enviornment = LabBotEnviornment();
+            obj.environment = LabBotEnvironment();
             obj.GUI_Func = GUI_Functions ();
             obj.wrkspaceCalc = LabBotCalculations ();
 
@@ -43,33 +43,12 @@ classdef LabBotMainControl
             obj.guiApp = GUI();  % Start GUI
 
                         
-            %% Environment not working 
+            %% Environment  
             % Initialize the environment
-            % disp('Initializing environment...');
-            % obj.enviornment.InitialiseEnviorment();  % Logic to initialize the environment
+            disp('Initializing environment...');
+            obj.environment.InitialiseEnvironment();  % Logic to initialize the environment
 
-            %% Set Up Enviorment 
-
-            % Call Enviorment class here
-
-            % Temporary Enviorment 
-            % Configure the axes and labels for the environment
-            axis([-5 5 -5 5 0 5]);  % Set the axis limits to fit all objects in the environment
-            xlabel('X-axis');  % Label the X-axis
-            ylabel('Y-axis');  % Label the Y-axis
-            zlabel('Z-axis');  % Label the Z-axis
-            grid on;  % Display a grid for better visualization of object positions
-            hold on;  % Keep the plot active for additional elements
-            
-            %% Robot Initialisation
-            % Initaialising Robot Models
-            self.rUR3 = UR3;
-            % self.rLabBot = LabBot_7DOF;
-
-            
-            %%
-
-            
+            %%            
 
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
@@ -88,7 +67,7 @@ classdef LabBotMainControl
             self.rLabBot = LabBot_7DOF;
            
             %% Initialisation of Enviorment 
-            obj.enviornment.InitialiseEnviorment();
+            obj.environment.InitialiseEnviorment();
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
@@ -146,7 +125,7 @@ classdef LabBotMainControl
 
         function WorkspaceCalculation(obj)
             %% Initialisation of Enviorment 
-            obj.enviornment.InitialiseEnviorment();
+            obj.environment.InitialiseEnvironment();
 
             %% Workspace Calculation 
             obj.wrkspaceCalc.WorkspaceCalc();
