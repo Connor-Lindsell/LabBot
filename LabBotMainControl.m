@@ -42,9 +42,7 @@ classdef LabBotMainControl
             % Create the GUI
             obj.guiApp = GUI();  % Start GUI
 
-            % Initially disable the interactive controls (sliders, etc.)
-            obj.GUI_Func.disableControls();
-            
+                        
             %% Environment not working 
             % Initialize the environment
             % disp('Initializing environment...');
@@ -68,18 +66,10 @@ classdef LabBotMainControl
             self.rUR3 = UR3;
             self.rLabBot = LabBot_7DOF;
 
-            %% Base transforms
-            UR3baseTr = transl(0,0,1);
-            LabBotbaseTr = transl(2,2,0);
-
-            self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
-            self.rUR3.model.base = self.rUR3.model.base.T * LabBotbaseTr;
-
-
+            
             %%
 
-            % Add all listeners for the GUI elements in the GUI_Functions class
-            obj.GUI_Func.addListeners(obj.guiApp);
+            
 
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);

@@ -22,119 +22,63 @@ classdef GUI_Functions
    
     %% Functions
     methods 
-        % Add all listeners for sliders, edit fields, and switch in the GUI
-        function addListeners(obj, guiApp)
-            % Add listener for the switch (on/off control)
-            addlistener(guiApp.Switch, 'ValueChanged', @(src, event) obj.toggleControl(src, event));
+        % Enable control method
+        function enableControl(obj)
+            obj.controlEnabled = true;
+        end
 
-            % Add listeners to the LabBot sliders for real-time joint control
-            addlistener(guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
-            addlistener(guiApp.Joint3Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
-            addlistener(guiApp.Joint4Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
-            addlistener(guiApp.Joint5Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
-            addlistener(guiApp.Joint6Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
-            
-            % Similarly, add listeners for UR3 joint sliders
-            addlistener(guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-            addlistener(guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
-            addlistener(guiApp.Joint3Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
-            addlistener(guiApp.Joint4Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
-            addlistener(guiApp.Joint5Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
-            addlistener(guiApp.Joint6Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
-
-            % Add listeners for LabBot edit fields (for joint control using values)
-            addlistener(guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
-
-            % Add listeners for UR3 edit fields
-            addlistener(guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-            addlistener(guiApp.EditField_UR3Joint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
-            addlistener(guiApp.EditField_UR3Joint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
-            addlistener(guiApp.EditField_UR3Joint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
-            addlistener(guiApp.EditField_UR3Joint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
-            addlistener(guiApp.EditField_UR3Joint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
+        % Disable control method
+        function disableControl(obj)
+            obj.controlEnabled = false;
         end
 
         %% Joint Movement with Integrated Jogging and DLS
-        function JointMovement(obj, robot, joint, value, isJogging)
+        function JointMovement(obj, robotName, joint, value, isJogging)
             % Move the joint based on either direct position control or jogging (velocity-based control)
+            
+            % Select the robot based on the robotName argument
+            switch robotName
+                case 'UR3'
+                    robot = obj.UR3;
+                case 'LabBot'
+                    robot = obj.LabBot;
+                otherwise
+                    error('Unknown robot specified.');
+            end
+
             if obj.controlEnabled
                 % Read the current joint configuration
                 currentQ = robot.getpos();
                 
-                % Check if we are in jogging mode
                 if isJogging
                     % Velocity-based movement using Damped Least Squares (DLS)
-                    % Initialize a zero force vector (6DOF), then set force for jogging
-                    f = zeros(6, 1);  % Assuming a 6-DOF robot, 6-element wrench vector
-                    f(joint) = value;  % Assign the force (or velocity) to the respective joint axis
+                    f = zeros(6, 1);  % Zero force vector for 6-DOF
+                    f(joint) = value;  % Assign the force (or velocity) for jogging
 
                     % Admittance scheme to convert force into velocity command
-                    Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);  % Admittance gain matrix
-                    dx = Ka * f;  % Calculate velocity command
+                    Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);
+                    dx = Ka * f;
 
                     % DLS Inverse Jacobian to calculate joint velocity
-                    J = robot.jacobe(currentQ);  % Get the Jacobian of the current configuration
-                    lambda = 0.1;  % Regularization parameter for DLS
-                    Jinv_dls = inv((J' * J) + lambda^2 * eye(6)) * J';  % DLS inverse
+                    J = robot.jacobe(currentQ);
+                    lambda = 0.1;
+                    Jinv_dls = inv((J' * J) + lambda^2 * eye(6)) * J';
 
                     % Calculate joint velocity
                     dq = Jinv_dls * dx;
 
                     % Apply joint velocity to update joint configuration
-                    dt = 0.1;  % Time step for velocity control
-                    newQ = currentQ + (dq' * dt);  % Update the joint angles based on velocity
+                    dt = 0.1;  % Time step
+                    newQ = currentQ + (dq' * dt);
 
                     % Animate the robot to the new configuration
-                    robot.animate(newQ);  % Animate the robot's motion
+                    robot.animate(newQ);
                     fprintf('Jogging robot joint %d with force %.2f, updated joint configuration.\n', joint, value);
                 else
-                    % Direct position-based control (teach-pendant style)
-                    currentQ(joint) = deg2rad(value);  % Convert from degrees to radians
-                    robot.animate(currentQ);  % Animate the robot to the new joint configuration
+                    % Direct position-based control
+                    currentQ(joint) = deg2rad(value);
+                    robot.animate(currentQ);
                     fprintf('Moved robot joint %d to %.2f degrees.\n', joint, value);
-                end
-            else
-                disp('Control is disabled. Please turn the switch on.');
-            end
-        end
-
-        %%
-        % Disable controls (called when switch is off)
-        function disableControls(obj)
-            obj.controlEnabled = false;
-        end
-
-        % Enable controls (called when switch is on)
-        function enableControls(obj)
-            obj.controlEnabled = true;
-        end
-
-        %%
-        % Toggle the control based on the switch state (on/off)
-        function toggleControl(obj, src, event)
-            if strcmp(src.Value, 'On')
-                obj.enableControls();  % Enable the control
-                disp('Controls enabled.');
-            else
-                obj.disableControls();  % Disable the control
-                disp('Controls disabled.');
-            end
-        end
-
-        %%
-        % Called when a slider is moved (for joint control)
-        function jointSliderMoved(obj, robotName, jointIndex, value)
-            if obj.controlEnabled
-                if strcmp(robotName, 'LabBot')
-                    obj.JointMovement(obj.rLabBot, jointIndex, value);
-                elseif strcmp(robotName, 'UR3')
-                    obj.JointMovement(obj.rUR3, jointIndex, value);
                 end
             else
                 disp('Control is disabled. Please turn the switch on.');
