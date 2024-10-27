@@ -2,7 +2,7 @@ classdef LabBotsControl
     %% Properties    
     properties
         rUR3
-        % rLabBot
+        rLabBot
         
         steps = 100;
         

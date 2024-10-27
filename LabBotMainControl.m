@@ -9,7 +9,7 @@ classdef LabBotMainControl
 
         % Initialise Robot models variables
         rUR3
-        rLabBot
+        % rLabBot
 
         % Initialise GUI 
         guiApp
