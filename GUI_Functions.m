@@ -39,9 +39,9 @@ classdef GUI_Functions
             % Select the robot based on the robotName argument
             switch robotName
                 case 'UR3'
-                    robot = obj.UR3;
+                    robot = obj.rUR3;
                 case 'LabBot'
-                    robot = obj.LabBot;
+                    robot = obj.rLabBot;
                 otherwise
                     error('Unknown robot specified.');
             end
