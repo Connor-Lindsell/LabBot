@@ -29,10 +29,10 @@ classdef GUI_Functions
         end
 
         % Disable control method
-        function disableControl(obj)
-            obj.controlEnabled = false;
-            disp('Control disabled in GUI_Functions');
-        end
+        % function disableControl(obj)
+        %     obj.controlEnabled = false;
+        %     disp('Control disabled in GUI_Functions');
+        % end
 
         %% Joint Movement with Integrated Jogging and DLS
         function JointMovement(obj, robotName, joint, value, isJogging)
