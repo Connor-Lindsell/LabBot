@@ -34,7 +34,8 @@ classdef GUI_Functions
             addlistener(guiApp.Joint4Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
             addlistener(guiApp.Joint5Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
             addlistener(guiApp.Joint6Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
-            
+            addlistener(guiApp.Joint7Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
+
             % Similarly, add listeners for UR3 joint sliders
             addlistener(guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
             addlistener(guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
@@ -50,6 +51,7 @@ classdef GUI_Functions
             addlistener(guiApp.EditField_LabBotJoint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
             addlistener(guiApp.EditField_LabBotJoint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
             addlistener(guiApp.EditField_LabBotJoint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
+            addlistener(guiApp.EditField_LabBotJoint7, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
 
             % Add listeners for UR3 edit fields
             addlistener(guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
