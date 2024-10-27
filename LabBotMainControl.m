@@ -9,7 +9,7 @@ classdef LabBotMainControl
 
         % Initialise Robot models variables
         rUR3
-        % rLabBot
+        rLabBot
 
         % Initialise GUI 
         guiApp
@@ -69,7 +69,7 @@ classdef LabBotMainControl
             self.rLabBot = LabBot_7DOF;
 
             %% Base transforms
-            UR3baseTr = transl(0,0,0);
+            UR3baseTr = transl(0,0,1);
             LabBotbaseTr = transl(2,2,0);
 
             self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
