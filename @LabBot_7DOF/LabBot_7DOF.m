@@ -14,7 +14,7 @@ classdef LabBot_7DOF < RobotBaseClass
         function self = LabBot_7DOF(baseTr)
 			self.CreateModel();
             if nargin < 1			
-				baseTr = eye(4);				
+				baseTr = transl(1,0,2);				
             end
             self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);
             

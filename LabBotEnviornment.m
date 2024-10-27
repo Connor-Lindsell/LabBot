@@ -3,7 +3,8 @@ classdef LabBotEnviornment
     properties 
         % Initialise Robot models variables
         rUR3
-        rLabBot
+        % rLabBot
+        % Enviroment
     end 
 
     %% Constructor method
@@ -20,6 +21,8 @@ classdef LabBotEnviornment
 
             % Call Enviorment class here
 
+            % self.Enviroment = Enviroment;
+
             % Temporary Enviorment 
             % Configure the axes and labels for the environment
             axis([-2 2 -2 2 0 2]);  % Set the axis limits to fit all objects in the environment
@@ -28,18 +31,18 @@ classdef LabBotEnviornment
             zlabel('Z-axis');  % Label the Z-axis
             grid on;  % Display a grid for better visualization of object positions
             hold on;  % Keep the plot active for additional elements
-            
+            % 
             %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
-            self.rLabBot = LabBot_7DOF;
+            % self.rLabBot = LabBot_7DOF;
 
             %% Base transforms
             UR3baseTr = transl(0,0,0);
-            LabBotbaseTr = transl(2,2,0);
+            % LabBotbaseTr = transl(2,2,0);
 
             self.rUR3.model.base = self.rUR3.model.base.T * UR3baseTr;
-            self.rUR3.model.base = self.rUR3.model.base.T * LabBotbaseTr;
+            % self.rUR3.model.base = self.rUR3.model.base.T * LabBotbaseTr;
 
             
         end

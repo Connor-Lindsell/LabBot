@@ -17,7 +17,7 @@ classdef UR3 < RobotBaseClass
                 if nargin == 2
                     error('If you set useTool you must pass in the toolFilename as well');
                 elseif nargin == 0 % Nothing passed
-                    baseTr = transl(0,0,0);  
+                    baseTr = transl(0,0,2);  
                 end             
             else % All passed in 
                 self.useTool = useTool;
