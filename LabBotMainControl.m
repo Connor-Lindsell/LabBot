@@ -63,7 +63,7 @@ classdef LabBotMainControl
             clf;
             %% Robot Initialisation
             % Initaialising Robot Models
-            self.rUR3 = UR3;
+            % self.rUR3 = UR3;
             % self.rLabBot = LabBot_7DOF;
            
             %% Initialisation of Enviorment 
@@ -89,14 +89,14 @@ classdef LabBotMainControl
             %% Perform Movements
             % Calling Move2Global using self
             % For UR3
-            obj.movementController.Move2Global(UR3_Pos1, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos2, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos3, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos4, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos5, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos6, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos7, self.rUR3);
-            obj.movementController.Move2Global(UR3_Pos8, self.rUR3);
+            obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
 
             
             % For LabBot

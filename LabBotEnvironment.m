@@ -32,6 +32,14 @@ classdef LabBotEnvironment < handle
             self.rUR3 = UR3;
             % self.rLabBot = LabBot_7DOF;
 
+    %% Scene Initialisation
+            axis([-5 5 -5 5 0 5]);  % Set the axis limits to fit all objects in the environment
+            xlabel('X-axis');  % Label the X-axis
+            ylabel('Y-axis');  % Label the Y-axis
+            zlabel('Z-axis');  % Label the Z-axis
+            grid on;  % Display a grid for better visualization of object positions
+            hold on;  % Keep the plot active for additional elements
+            camlight;
     %% Base transforms
             % UR3baseTr = transl(0,0,2);
             % LabBotbaseTr = transl(1,0,2);

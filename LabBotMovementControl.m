@@ -2,6 +2,14 @@ classdef LabBotMovementControl
     
     properties 
         steps = 100;
+
+        environment
+    end
+
+    methods 
+        function obj = LabBotMovementControl
+            obj.environment = LabBotEnvironment();
+        end
     end
 
     methods
@@ -14,6 +22,16 @@ classdef LabBotMovementControl
         % Robot: calls the robot that is required to move
         
         function Move2Global(self, finishTr, robot)
+
+            % switch robot
+            %     case 'UR3'
+            %         robot = obj.rUR3;
+            %     case 'LabBot'
+            %         robot = obj.rLabBot;
+            %     otherwise
+            %         error('Unknown robot specified.');
+            % end
+
             % Calculate the target orientation using RollPitchYawCalc
             rpy = self.RollPitchYawCalc(finishTr);
             targetTransform = transl(finishTr) * rpy;
