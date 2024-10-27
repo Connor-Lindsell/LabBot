@@ -47,7 +47,7 @@ classdef LabBotMainControl
             
             %% Environment not working 
             % Initialize the environment
-            % disp('Initializing environment...');
+            disp('Initializing environment...');
             obj.environment.InitialiseEnvironment();  % Logic to initialize the environment
 
             % %% Set Up Enviorment 

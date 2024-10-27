@@ -19,10 +19,11 @@ classdef LabBotEnvironment < handle
             zlabel('Z-axis');  % Label the Z-axis
             grid on;  % Display a grid for better visualization of object positions
             hold on;  % Keep the plot active for additional elements
+            camlight;
    %% Object Initialiastion         
             
         self.Table = Table;
-        self.Beaker = Beaker(1,0.5,2);
+        self.Beaker = Beaker();
         self.Conical = Conical(-1,0.5,2);
         % self.Cube = Cube;
 

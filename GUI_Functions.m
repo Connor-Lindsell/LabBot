@@ -27,39 +27,39 @@ classdef GUI_Functions
             % Add listener for the switch (on/off control)
             addlistener(guiApp.Switch, 'ValueChanged', @(src, event) obj.toggleControl(src, event));
 
-            % Add listeners to the LabBot sliders for real-time joint control
-            addlistener(guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
-            addlistener(guiApp.Joint3Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
-            addlistener(guiApp.Joint4Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
-            addlistener(guiApp.Joint5Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
-            addlistener(guiApp.Joint6Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
-            addlistener(guiApp.Joint7Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
-
-            % Similarly, add listeners for UR3 joint sliders
-            addlistener(guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-            addlistener(guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
-            addlistener(guiApp.Joint3Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
-            addlistener(guiApp.Joint4Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
-            addlistener(guiApp.Joint5Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
-            addlistener(guiApp.Joint6Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
-
-            % Add listeners for LabBot edit fields (for joint control using values)
-            addlistener(guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
-            addlistener(guiApp.EditField_LabBotJoint7, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
-
-            % Add listeners for UR3 edit fields
-            addlistener(guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
-            addlistener(guiApp.EditField_UR3Joint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
-            addlistener(guiApp.EditField_UR3Joint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
-            addlistener(guiApp.EditField_UR3Joint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
-            addlistener(guiApp.EditField_UR3Joint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
-            addlistener(guiApp.EditField_UR3Joint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
+            % % Add listeners to the LabBot sliders for real-time joint control
+            % addlistener(guiApp.Joint1Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            % addlistener(guiApp.Joint2Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
+            % addlistener(guiApp.Joint3Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
+            % addlistener(guiApp.Joint4Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
+            % addlistener(guiApp.Joint5Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
+            % addlistener(guiApp.Joint6Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
+            % addlistener(guiApp.Joint7Slider_LabBot, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
+            % 
+            % % Similarly, add listeners for UR3 joint sliders
+            % addlistener(guiApp.Joint1Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+            % addlistener(guiApp.Joint2Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
+            % addlistener(guiApp.Joint3Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
+            % addlistener(guiApp.Joint4Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
+            % addlistener(guiApp.Joint5Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
+            % addlistener(guiApp.Joint6Slider_UR3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
+            % 
+            % % Add listeners for LabBot edit fields (for joint control using values)
+            % addlistener(guiApp.EditField_LabBotJoint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 1, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 2, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 3, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 4, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 5, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 6, src.Value));
+            % addlistener(guiApp.EditField_LabBotJoint7, 'ValueChanged', @(src, event) obj.jointSliderMoved('LabBot', 7, src.Value));
+            % 
+            % % Add listeners for UR3 edit fields
+            % addlistener(guiApp.EditField_UR3Joint1, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 1, src.Value));
+            % addlistener(guiApp.EditField_UR3Joint2, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 2, src.Value));
+            % addlistener(guiApp.EditField_UR3Joint3, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 3, src.Value));
+            % addlistener(guiApp.EditField_UR3Joint4, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 4, src.Value));
+            % addlistener(guiApp.EditField_UR3Joint5, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 5, src.Value));
+            % addlistener(guiApp.EditField_UR3Joint6, 'ValueChanged', @(src, event) obj.jointSliderMoved('UR3', 6, src.Value));
         end
 
         %% Joint Movement with Integrated Jogging and DLS
