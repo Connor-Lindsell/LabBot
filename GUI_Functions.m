@@ -1,7 +1,7 @@
 classdef GUI_Functions
     %% Properties
     properties
-        controlEnabled = false; 
+        controlEnabled = true; 
 
         % Objects of Parent classes
         movementController

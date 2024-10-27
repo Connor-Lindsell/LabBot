@@ -17,21 +17,35 @@ classdef LabBotMainControl
 
     %% Constructor method
     methods
-        function obj = LabBotMainControl
+        function obj = LabBotMainControl(controlCase)
             % Initialise Parent classes 
             obj.movementController = LabBotMovementControl();
             obj.environment = LabBotEnvironment();
-            obj.GUI_Func = GUI_Functions ();
-            obj.wrkspaceCalc = LabBotCalculations ();
+            obj.GUI_Func = GUI_Functions();
+            obj.wrkspaceCalc = LabBotCalculations();
 
-            % Call SimultaneousControl
-            obj.DemonstrationControl();
-
-            % Call GUI interface
-            % obj.GUI_InterfaceControl();
-
+                
+            % Switch based on the numeric control case provided
+            switch controlCase
+                case 1
+                    % Call SimultaneousControl function
+                    obj.DemonstrationControl();
+    
+                case 2
+                    % Call GUI interface function
+                    obj.GUI_InterfaceControl();
+    
+                case 3
+                    % Call workspace calculation function
+                    obj.WorkspaceCalculation();
+    
+                otherwise
+                    % If an unknown case is provided, display an error message
+                    error('Unknown control case specified: %d', controlCase);
+            end
         end
-    end 
+    end
+
 
     %% Functions
     methods 
@@ -53,19 +67,14 @@ classdef LabBotMainControl
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
         end
-
-        
+   
    
                 
 
         %% Demonstration of Robot Control
         function DemonstrationControl(obj)
             clf;
-            %% Robot Initialisation
-            % Initaialising Robot Models
-            % self.rUR3 = UR3;
-            % self.rLabBot = LabBot_7DOF;
-           
+                       
             %% Initialisation of Enviorment 
             obj.environment.InitialiseEnvironment();
                               
