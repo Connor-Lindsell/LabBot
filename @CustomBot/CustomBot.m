@@ -38,6 +38,7 @@ classdef CustomBot < RobotBaseClass
             end             
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);  
+            self.model.plotopt = {'nojoints', 'noname', 'noshadow', 'nowrist','noarrow', 'nojaxes'};
 
             self.PlotAndColourRobot();
 

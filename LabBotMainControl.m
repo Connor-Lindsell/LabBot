@@ -178,13 +178,13 @@ classdef LabBotMainControl
             obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'UR3');
 
             %% Break
-            input('Press "c" to continue',"c")
+            input('Press "c" to continue \n',"s")
 
             %% LabBot Calculation
             % Calculate workspace for LabBot
             disp('Calculating workspace for LabBot...');
-            robot = obj.environment.rLabBot;
-            obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'LabBot');
+            robot = obj.environment.rCustomBot;
+            obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'CustomBot');
 
         end
     end

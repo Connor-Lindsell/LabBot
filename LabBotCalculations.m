@@ -5,7 +5,7 @@ classdef LabBotCalculations
 
         % Initialise Robot models variables
         rUR3
-        rLabBot
+        rCustomBot
     end
 
     methods 
@@ -25,7 +25,7 @@ classdef LabBotCalculations
         %% Function to calculate and visualize workspace for a given robot
         function calculateRobotWorkspace(self, robot, robotName)
             % Define the step size in degrees and convert it to radians
-            stepDeg = 5;  % Step size in degrees
+            stepDeg = 20;  % Step size in degrees
             stepRads = deg2rad(stepDeg);  % Convert step size to radians
             
             % fprintf ('Robot: %d\n', robot)

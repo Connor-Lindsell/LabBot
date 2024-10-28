@@ -29,6 +29,7 @@ classdef UR3 < RobotBaseClass
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr;
             self.model.tool = self.toolTr;
+            self.model.plotopt = { 'noname', 'noshadow', 'noarrow'};
             self.PlotAndColourRobot();
 
             % drawnow

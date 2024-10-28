@@ -1,16 +1,16 @@
   %% Limited joint Point coloud
-        function pointCloud()
-            robot = LinearUR3e;
+        function EnvelopeCalcs()
+            robot = CustomBot;
             %robot.model.base = robot.model.base.T * transl(0, 0, 0) % transl(0, 0.25, 0.5)% Y,Z,X
             robot.model.plotopt = {'nojoints', 'noname', 'noshadow', 'nowrist'};
             hold on
             workspace = [-2 2 -2 2 -2 2];
             scale = 1;
-            stepRads = deg2rad(10);
+            stepRads = deg2rad(40);
             gndHeight = 0;
             stepLin = 0.1;
             qlim = robot.model.qlim
-            pointCloudeSize = prod(floor((qlim(2:3,2)-qlim(2:3,1))/stepRads)) * prod(floor(((qlim(1,2)-qlim(1,1))/stepLin) + 1));
+            pointCloudeSize = prod(floor((qlim(2:5,2)-qlim(2:5,1))/stepRads)) * prod(floor(((qlim(1,2)-qlim(1,1))/stepLin) + 1));
             pointCloud = zeros(pointCloudeSize,3);
             counter = 1;
             tic
@@ -19,12 +19,15 @@
 for q1 = qlim(1,1):stepLin:qlim(1,2)
     for q2 = qlim(2,1):stepRads:qlim(2,2)
         for q3 = qlim(3,1):stepRads:qlim(3,2)
-            q4 = 0;
-                q5 = 0; 
-                    q6 = 0;
-                        q7=0;
-                     %for q6 = qlim(6,1):stepRads:qlim(6,2)
-                        q = [q1,q2,q3,q4,q5,q6,q7];
+            for q4 = qlim(4,1):stepRads:qlim(4,2)
+            % q4 = 0;
+                for q5 = qlim(5,1):stepRads:qlim(5,2)
+                    % q5 = 0;
+                        %for q6 = qlim(6,1):stepRads:qlim(6,2)
+                            q6 = 0;
+                                % q7=0;
+                     
+                        q = [q1,q2,q3,q4,q5,q6];
                         tr = robot.model.fkine(q).T;  
                         %if tr(3,4)' > -1
                         pointCloud(counter,:) = tr(1:3,4)';
@@ -32,12 +35,12 @@ for q1 = qlim(1,1):stepLin:qlim(1,2)
                         if mod(counter/pointCloudeSize * 100,1) == 0
                             display(['After ',num2str(toc),' seconds, completed ',num2str(counter/pointCloudeSize * 100),'% of poses']);
                         end
-                     
-                       %end
+                end 
+             end
         end
     end
 end
-%plot3(pointCloud(:,1),pointCloud(:,2),pointCloud(:,3),'r.');
+% plot3(pointCloud(:,1),pointCloud(:,2),pointCloud(:,3),'r.');
 
 
 xPoints = [pointCloud(:,1)];
@@ -84,7 +87,7 @@ av
  text_h = text(10, 50, message, 'FontSize', 10, 'Color', [.6 .2 .6]);
 
 axis equal
-%hold on
-%robot.model.plot3d(q,'workspace',workspace,'scale',scale);
+% hold on
+% robot.model.plot3d(q,'workspace',workspace,'scale',scale);
 
         end
