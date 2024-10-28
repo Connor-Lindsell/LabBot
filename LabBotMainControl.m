@@ -82,8 +82,8 @@ classdef LabBotMainControl
 
             %% Call Listening function 
             % robot = self.rUR3;
-            robot = obj.environment.rUR3;
-            obj.GUI_Func.GUITeachUR3(robot);
+            % robot = obj.environment.rUR3;
+            % obj.GUI_Func.GUITeachUR3(robot);
 
             robot = obj.environment.rCustomBot;
             obj.GUI_Func.GUITeachCustomBot(robot);

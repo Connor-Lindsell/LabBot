@@ -67,10 +67,10 @@ classdef GUI_Functions
                 % Read VTP values (joint angles in degrees)
                 watch = pendant.read2;
 
-                q(1) = watch;
+                q(1) = watch(1);
                 
                 % Convert degrees to radians for each joint
-                q(2:7) = deg2rad(watch');
+                q(2:7) = deg2rad(watch(2:7)');
         
                 disp(q);
 
