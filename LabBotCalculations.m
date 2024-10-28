@@ -1,10 +1,18 @@
 classdef LabBotCalculations 
     %% Properties
     properties 
+        environment
+
         % Initialise Robot models variables
         rUR3
         rLabBot
-    end 
+    end
+
+    methods 
+        function obj = LabBotCalculations
+            obj.environment = LabBotEnvironment();
+        end
+    end
 
     methods
         %% WorkspaceCalc: Computes and visualizes the robots' reachable workspaces
@@ -12,26 +20,16 @@ classdef LabBotCalculations
         % visualizes their maximum reach in 3D space, and computes the volume of the
         % convex hull of the reachable workspace.
         
-        function WorkspaceCalc(obj)            
-            % Initialize both the UR3 and LabBot robots
-            obj.rUR3 = UR3();  % Assuming UR3 model is implemented as a class
-            obj.rLabBot = LabBot_7DOF();  % Assuming LabBot 7DOF is implemented as a class
-
-            % Calculate workspace for UR3
-            disp('Calculating workspace for UR3...');
-            obj.calculateRobotWorkspace(obj.rUR3, 'UR3');
-
-            % Calculate workspace for LabBot
-            disp('Calculating workspace for LabBot...');
-            obj.calculateRobotWorkspace(obj.rLabBot, 'LabBot');
-        end
+        
 
         %% Function to calculate and visualize workspace for a given robot
-        function calculateRobotWorkspace(obj, robot, robotName)
+        function calculateRobotWorkspace(self, robot, robotName)
             % Define the step size in degrees and convert it to radians
             stepDeg = 5;  % Step size in degrees
             stepRads = deg2rad(stepDeg);  % Convert step size to radians
             
+            % fprintf ('Robot: %d\n', robot)
+
             % Retrieve the joint limits of the robot
             qlim = robot.model.qlim;  % Joint limit matrix
             
@@ -52,7 +50,7 @@ classdef LabBotCalculations
                     % Loop through joint 3 (elbow) limits
                     for q3 = qlim(3,1):stepRads:qlim(3,2)
                         % Set joint angles for q1, q2, q3; other joints fixed at 0
-                        q = [q1, q2, q3, 0, 0, 0, 0];  
+                        q = [q1, q2, q3, 0, 0, 0];  
                         
                         % Perform forward kinematics to get the transformation matrix (position)
                         tr = robot.model.fkine(q).T;  % Compute the forward kinematics

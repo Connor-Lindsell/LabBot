@@ -159,7 +159,19 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
 
             %% Workspace Calculation 
-            obj.wrkspaceCalc.WorkspaceCalc();
+            % obj.wrkspaceCalc.WorkspaceCalc();
+
+            % Calculate workspace for UR3
+            disp('Calculating workspace for UR3...');
+            robot = obj.environment.rUR3;
+            obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'UR3');
+
+            input('Press "c" to continue',"c")
+
+            % Calculate workspace for LabBot
+            disp('Calculating workspace for LabBot...');
+            robot = obj.environment.rLabBot;
+            obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'LabBot');
 
         end
     end
