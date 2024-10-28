@@ -1,10 +1,10 @@
 function GUITeach()
     %% Robot Initialisation
     % Initaialising Robot Model
-    robot = UR3;
+    robot = CustomBot;
 
     %% Scene Initialisation
-    axis([-2 2 -2 2 2 4]);  % Set the axis limits to fit all objects in the environment
+    axis([-2 2 -2 2 0 4]);  % Set the axis limits to fit all objects in the environment
     xlabel('X-axis');  % Label the X-axis
     ylabel('Y-axis');  % Label the Y-axis
     zlabel('Z-axis');  % Label the Z-axis
@@ -13,7 +13,7 @@ function GUITeach()
  
 
     %% Setup virtual teach pendant
-    pendant = GUI;   
+    pendant = TestTeach;   
 
 
     %% Infinite loop for teaching mode

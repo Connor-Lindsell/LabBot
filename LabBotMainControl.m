@@ -85,6 +85,9 @@ classdef LabBotMainControl
             robot = obj.environment.rUR3;
             obj.GUI_Func.GUITeachUR3(robot);
 
+            robot = obj.environment.rCustomBot;
+            obj.GUI_Func.GUITeachCustomBot(robot);
+
             %% Wait for Gui          
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);

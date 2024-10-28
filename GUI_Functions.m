@@ -30,8 +30,7 @@ classdef GUI_Functions
                     
             %% Setup virtual teach pendant
             pendant = GUI;   
-        
-        
+               
             %% Infinite loop for teaching mode
             while 1
                 % Read VTP values (joint angles in degrees)
@@ -54,11 +53,38 @@ classdef GUI_Functions
                 % Pause briefly for real-time update (adjust as needed)
                 pause(0.05);
 
-            end
-        
-            %%
+            end           
+        end
+
+        function GUITeachCustomBot(obj, robot)
             
+                    
+            %% Setup virtual teach pendant
+            pendant = GUI;   
+               
+            %% Infinite loop for teaching mode
+            while 1
+                % Read VTP values (joint angles in degrees)
+                wrench = pendant.read;
+                
+                % Convert degrees to radians for each joint
+                q = deg2rad(wrench');
         
+                % Display the joint angles in the command window
+                str = sprintf('--------------\n');
+                for i = 1:6
+                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
+                end
+                str = [str, sprintf('--------------\n')];
+                fprintf('%s', str);
+        
+                % Animate the robot with updated joint angles
+                robot.model.animate(q);
+        
+                % Pause briefly for real-time update (adjust as needed)
+                pause(0.05);
+
+            end           
         end
 
         %%
