@@ -13,7 +13,7 @@ function GUITeach()
  
 
     %% Setup virtual teach pendant
-    pendant = TestTeach;   
+    pendant = GUI;   
 
 
     %% Infinite loop for teaching mode
