@@ -85,7 +85,7 @@ classdef LabBotMainControl
 
         function DemonstrationControl(obj)
             clf;
-            disp('Demonstration Control Comencing')
+            disp('Demonstration Control Commencing')
                        
             %% Initialisation of Enviorment   
             % Initialize the environment

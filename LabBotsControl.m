@@ -2,7 +2,7 @@ classdef LabBotsControl
     %% Properties    
     properties
         rUR3
-        rLabBot
+        rCustomBot
         
         steps = 100;
         
@@ -25,7 +25,7 @@ classdef LabBotsControl
             %% Robot Initialisation
             % Initaialising Robot Models
             self.rUR3 = UR3;
-            % rLabBot = LabBot;
+            self.rCustomBot = CustomBot;
            
             %% Base transforms
 
@@ -56,8 +56,8 @@ classdef LabBotsControl
             UR3_Pos8 = [-0.2,-0.3,0.2]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
-            % LabBot_Pos1 = [0.2,0.2,0.2];
-            % LabBot_End = [0.2,0.2,0.2];
+            LabBot_Pos1 = [0.2,0.2,0.2];
+            LabBot_End = [0.2,0.2,0.2];
 
 
             %% Perform Movements
@@ -74,8 +74,8 @@ classdef LabBotsControl
 
             
             % For LabBot
-            % self.Move2Global(LabBot_Start, LabBot_Pos1, rLabBot);
-            % self.Move2Global(LabBot_Pos1, LabBot_End, rLabBot);             
+            self.Move2Global(LabBot_Start, LabBot_Pos1, CustomBot);
+            self.Move2Global(LabBot_Pos1, LabBot_End, CustomBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 
