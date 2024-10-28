@@ -58,8 +58,8 @@ classdef CustomBot < RobotBaseClass
             link(2) = Link('d',0.15,'a',0.1,'alpha',pi);
             link(3) = Link('d',-0.1,'a',0,'alpha',-pi/2);
             link(4) = Link('d',0,'a',0.4,'alpha',pi);
-            link(5) = Link('d',0,'a',0.5,'alpha',pi/2);
-            % link(6) = Link('d',0.08535,'a',0,'alpha',-pi/2);
+            link(5) = Link('d',0,'a',0,'alpha',pi/2);
+            link(6) = Link('d',0.01,'a',0.5,'alpha',-pi/2);
             % link(7) = Link('d',	0.0921,'a',0,'alpha',0);
 
          
@@ -71,14 +71,14 @@ classdef CustomBot < RobotBaseClass
             link(3).qlim = [-360 360]*pi/180;
             link(4).qlim = [-360 360]*pi/180;
             link(5).qlim = [-360 360]*pi/180;
-            % link(6).qlim = [-360 360]*pi/180;
+            link(6).qlim = [-360 360]*pi/180;
             % Link(7).qlim = [-Inf, Inf] %(continous rotation)
 
             % Link offsets
-            link(2).offset = pi/2;
-            link(3).offset = pi;
-            link(4).offset = pi/2;
-            link(5).offset = pi/2;
+            % link(2).offset = pi/2;
+            % link(3).offset = pi;
+            % link(4).offset = pi/2;
+            % link(5).offset = pi/2;
             % 
             self.model = SerialLink(link,'name', self.name);
         end    
