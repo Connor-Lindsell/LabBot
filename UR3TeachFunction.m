@@ -3,6 +3,6 @@ function UR3TeachFunction()
 
     robot = UR3(); 
     
-    robot.model.teach();
+    robot.model. teach();
 
 end
