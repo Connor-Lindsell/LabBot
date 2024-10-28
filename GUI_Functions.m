@@ -5,6 +5,7 @@ classdef GUI_Functions
 
         % Objects of Parent classes
         movementController
+        environment
 
         % Initialise Robot models variables
         rUR3
@@ -17,15 +18,16 @@ classdef GUI_Functions
         function obj = GUI_Functions
             % Initialise Parent classes 
             obj.movementController = LabBotMovementControl();
+            obj.environment = LabBotEnvironment();
         end
     end
    
     %% Functions
     methods 
 
-        function GUITeach()
+        function GUITeachUR3(obj, robot)
+            
                     
-        
             %% Setup virtual teach pendant
             pendant = GUI;   
         
@@ -141,7 +143,7 @@ classdef GUI_Functions
         %           of pairs eg. {'Bromine', 1}
         % mixingLocation: Where the chemicals are to be mixed
         
-        function MixChem(self, numOfChem, chem2mix, mixingLocation)
+        function MixChem(obj, numOfChem, chem2mix, mixingLocation)
             % Define test tube locations (you could adjust this as per your environment)
             testTubeLocation = {[0.2, -0.2, 0.2], ...
                                 [0.2, -0.1, 0.2], ...
@@ -162,7 +164,7 @@ classdef GUI_Functions
                 finishPos = testTubeLocation{locationIndex};  % Test tube location 
                 
                 % Move UR3 to the test tube
-                obj.movementController.Move2Global(finishPos, self.rUR3);
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
                 
                 % self.GripperClose();
                 fprintf('Gripper closing to pick up %s...\n', chemical);
@@ -174,7 +176,7 @@ classdef GUI_Functions
                 fprintf('\n');
                 
                 % Move robot to the mixing location with the chemical
-                obj.movementController.Move2Global(finishPos, self.rUR3);
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
                 
                 %% Mix Chem
                 % self.PourChem(); 
@@ -188,7 +190,7 @@ classdef GUI_Functions
                 fprintf('\n');
                 
                 % Move robot back to return the test tube
-                obj.movementController.Move2Global(finishPos, self.rUR3);
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
                 
                 % self.GripperOpen(); 
                 fprintf('Gripper opening to release test tube %d...\n', locationIndex);

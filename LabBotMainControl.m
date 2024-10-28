@@ -76,6 +76,15 @@ classdef LabBotMainControl
             obj.environment.InitialiseEnvironment();  
             disp('Enviornment Initialised');
 
+            % Initaialising Robot Models
+            % self.rUR3 = UR3(transl(0,0,1.5));
+            % self.rCustomBot = CustomBot(transl(-1,0,1.5));
+
+            %% Call Listening function 
+            % robot = self.rUR3;
+            robot = obj.environment.rUR3;
+            obj.GUI_Func.GUITeachUR3(robot);
+
             %% Wait for Gui          
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
@@ -136,7 +145,7 @@ classdef LabBotMainControl
                               };
 
             % Call MixChem with 3 chemicals and mixing location 3
-            MixChem(self, 3, chemicals2mix1, 3)
+            obj.GUI_Func.MixChem( 3, chemicals2mix1, 3)
 
             chemicals2mix2 = {{'New Mixture', 3}, ... 
                               {'Nitrogen', 4} ...
