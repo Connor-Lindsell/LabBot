@@ -6,7 +6,7 @@ classdef LabBotEnvironment < handle
         Table;
         Cube;
         rUR3
-        rLabBot
+        rCustomBot
     end
     
     methods
@@ -23,14 +23,14 @@ classdef LabBotEnvironment < handle
    %% Object Initialiastion         
             
         self.Table = Table;
-        self.Beaker = Beaker(1,0.5,2);
-        self.Conical = Conical(-1,0.5,2);
+        self.Beaker = Beaker(1,0.5,1.5);
+        self.Conical = Conical(-1,0.5,1.5);
         % self.Cube = Cube;
 
     % Robot Initialisation
             % Initaialising Robot Models
-            self.rUR3 = UR3;
-            % self.rLabBot = LabBot_7DOF;
+            self.rUR3 = UR3(transl(0,0,1.5));
+            self.rCustomBot = CustomBot(transl(-1,0,1.5));
 
     %% Scene Initialisation
             axis([-5 5 -5 5 0 5]);  % Set the axis limits to fit all objects in the environment

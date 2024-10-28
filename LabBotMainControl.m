@@ -9,7 +9,7 @@ classdef LabBotMainControl
 
         % Initialise Robot models variables
         rUR3
-        rLabBot
+        rCustomBot
 
         % Initialise GUI 
         guiApp
@@ -27,21 +27,21 @@ classdef LabBotMainControl
                 
             % Switch based on the numeric control case provided
             switch controlCase
-                case 1
+                case 1 % GUI
                     % Debugging Line
                     fprintf('Received controlCase: %d\n', controlCase);
 
                     % Call GUI interface function
                     obj.GUI_InterfaceControl();
                         
-                case 2
+                case 2 % Demo
                     % Debugging Line
                     fprintf('Received controlCase: %d\n', controlCase);
 
                     % Call SimultaneousControl function
                     obj.DemonstrationControl();
     
-                case 3
+                case 3 % Calc
                     % Debugging Line
                     fprintf('Received controlCase: %d\n', controlCase);
 
@@ -98,14 +98,14 @@ classdef LabBotMainControl
             %% Trasforms
             % UR3 End Effector Goal Destinations 
             % Cheecking for correct orientation
-            UR3_Pos1 = [0.3,0.2,2.2]; % positive x Q++
-            UR3_Pos2 = [-0.3,0.2,2.2]; % negative x Q-+
-            UR3_Pos3 = [0.2,0.3,2.2]; % positive y Q++
-            UR3_Pos4 = [0.2,-0.3,2.2]; % negative y Q+-
-            UR3_Pos5 = [0.3,-0.2,2.2]; % positive x Q+-
-            UR3_Pos6 = [-0.3,-0.2,2.2]; % negative x Q--
-            UR3_Pos7 = [-0.2,0.3,2.2]; % positive y Q-+
-            UR3_Pos8 = [-0.2,-0.3,2.2]; % negative y Q--
+            UR3_Pos1 = [0.3,0.2,1.6]; % positive x Q++
+            UR3_Pos2 = [-0.3,0.2,1.6]; % negative x Q-+
+            UR3_Pos3 = [0.2,0.3,1.6]; % positive y Q++
+            UR3_Pos4 = [0.2,-0.3,1.6]; % negative y Q+-
+            UR3_Pos5 = [0.3,-0.2,1.6]; % positive x Q+-
+            UR3_Pos6 = [-0.3,-0.2,1.6]; % negative x Q--
+            UR3_Pos7 = [-0.2,0.3,1.6]; % positive y Q-+
+            UR3_Pos8 = [-0.2,-0.3,1.6]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
             % LabBot_Pos1 = [0.2,0.2,0.2];
