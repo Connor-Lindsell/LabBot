@@ -38,15 +38,15 @@ classdef CustomBot < RobotBaseClass
             end             
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);  
-            
-            self.PlotAndColourRobot();
+            % 
+            % self.PlotAndColourRobot();
 
             % 
-            % workspace = [-2 2 -2 2 -0 2];                                       % Set the size of the workspace when drawing the robot        
-            % scale = 0.5;        
-            % q = zeros(1,3);                                                     % Create a vector of initial joint angles        
-            % self.model.plot(q,'workspace',workspace,'scale',scale);
-            % self.model.teach();
+            workspace = [-2 2 -2 2 -0 2];                                       % Set the size of the workspace when drawing the robot        
+            scale = 0.5;        
+            q = zeros(1,4);                                                     % Create a vector of initial joint angles        
+            self.model.plot(q,'workspace',workspace,'scale',scale);
+            self.model.teach();
 
 
             % drawnow
@@ -56,8 +56,8 @@ classdef CustomBot < RobotBaseClass
         function CreateModel(self)
             link(1) = Link([pi     0       0       pi/2    1]); % PRISMATIC Link
             link(2) = Link('d',0.3,'a',0.1,'alpha',pi);
-            link(3) = Link('d',0.01,'a',0.05,'alpha',pi);
-            % link(4) = Link('d',0,'a',-0.2132,'alpha',0);
+            link(3) = Link('d',0.01,'a',0,'alpha',pi);
+            link(4) = Link('d',0,'a',0.5,'alpha',pi/2);
             % link(5) = Link('d',0.13105,'a',0,'alpha',pi/2);
             % link(6) = Link('d',0.08535,'a',0,'alpha',-pi/2);
             % link(7) = Link('d',	0.0921,'a',0,'alpha',0);
@@ -69,7 +69,7 @@ classdef CustomBot < RobotBaseClass
             link(1).qlim = [0.01 0.8];
             link(2).qlim = [-360 360]*pi/180;
             link(3).qlim = [-360 360]*pi/180;
-            % link(4).qlim = [-360 360]*pi/180;
+            link(4).qlim = [-360 360]*pi/180;
             % link(5).qlim = [-360 360]*pi/180;
             % link(6).qlim = [-360 360]*pi/180;
             % Link(7).qlim = [-Inf, Inf] %(continous rotation)
