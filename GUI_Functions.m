@@ -34,7 +34,7 @@ classdef GUI_Functions
             %% Infinite loop for teaching mode
             while 1
                 % Read VTP values (joint angles in degrees)
-                wrench = pendant.read;
+                wrench = pendant.read1;
                 
                 % Convert degrees to radians for each joint
                 q = deg2rad(wrench');
@@ -65,14 +65,18 @@ classdef GUI_Functions
             %% Infinite loop for teaching mode
             while 1
                 % Read VTP values (joint angles in degrees)
-                wrench = pendant.read;
+                watch = pendant.read2;
+
+                q(1) = watch(1);
                 
                 % Convert degrees to radians for each joint
-                q = deg2rad(wrench');
+                q(2:7) = deg2rad(watch(2:7)');
         
+                disp(q);
+
                 % Display the joint angles in the command window
                 str = sprintf('--------------\n');
-                for i = 1:6
+                for i = 1:7
                     str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
                 end
                 str = [str, sprintf('--------------\n')];

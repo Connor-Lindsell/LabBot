@@ -19,10 +19,10 @@ function GUITeach()
     %% Infinite loop for teaching mode
     while 1
         % Read VTP values (joint angles in degrees)
-        wrench = pendant.read;
+        rench = pendant.read;
         
         % Convert degrees to radians for each joint
-        q = deg2rad(wrench');
+        q = deg2rad(rench');
 
         % Display the joint angles in the command window
         str = sprintf('--------------\n');
