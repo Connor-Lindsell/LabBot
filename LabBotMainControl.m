@@ -62,12 +62,13 @@ classdef LabBotMainControl
     %% Functions
     methods 
         %% Control Through GUI Interface
+
         function GUI_InterfaceControl(obj)
             disp('GUI Interface Control Comencing')
         
+            %% Create GUI
             % Create the GUI
             obj.guiApp = GUI();  % Start GUI
-
                         
             %% Environment  
             % Initialize the environment
@@ -75,16 +76,13 @@ classdef LabBotMainControl
             obj.environment.InitialiseEnvironment();  
             disp('Enviornment Initialised');
 
-            %%            
-
+            %% Wait for Gui          
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
-        end
-   
-   
-                
+        end                
 
         %% Demonstration of Robot Control
+
         function DemonstrationControl(obj)
             clf;
             disp('Demonstration Control Comencing')
@@ -149,6 +147,8 @@ classdef LabBotMainControl
                     
         end
 
+        %% Workspace Calculation 
+
         function WorkspaceCalculation(obj)
             disp('Workspace Calculation Comencing')
 
@@ -159,15 +159,16 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
 
             %% Workspace Calculation 
-            % obj.wrkspaceCalc.WorkspaceCalc();
-
+            %% UR3 Calculation
             % Calculate workspace for UR3
             disp('Calculating workspace for UR3...');
             robot = obj.environment.rUR3;
             obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'UR3');
 
+            %% Break
             input('Press "c" to continue',"c")
 
+            %% LabBot Calculation
             % Calculate workspace for LabBot
             disp('Calculating workspace for LabBot...');
             robot = obj.environment.rLabBot;
