@@ -28,18 +28,30 @@ classdef LabBotMainControl
             % Switch based on the numeric control case provided
             switch controlCase
                 case 1
+                    % Debugging Line
+                    fprintf('Received controlCase: %d\n', controlCase);
+
+                    % Call GUI interface function
+                    obj.GUI_InterfaceControl();
+                        
+                case 2
+                    % Debugging Line
+                    fprintf('Received controlCase: %d\n', controlCase);
+
                     % Call SimultaneousControl function
                     obj.DemonstrationControl();
     
-                case 2
-                    % Call GUI interface function
-                    obj.GUI_InterfaceControl();
-    
                 case 3
+                    % Debugging Line
+                    fprintf('Received controlCase: %d\n', controlCase);
+
                     % Call workspace calculation function
                     obj.WorkspaceCalculation();
     
                 otherwise
+                    % Debugging Line
+                    fprintf('Received controlCase: %d\n', controlCase);
+
                     % If an unknown case is provided, display an error message
                     error('Unknown control case specified: %d', controlCase);
             end
@@ -51,7 +63,7 @@ classdef LabBotMainControl
     methods 
         %% Control Through GUI Interface
         function GUI_InterfaceControl(obj)
-            % Start GUI and environment, but wait for the On switch to enable controls
+            disp('GUI Interface Control Comencing')
         
             % Create the GUI
             obj.guiApp = GUI();  % Start GUI
@@ -59,8 +71,9 @@ classdef LabBotMainControl
                         
             %% Environment  
             % Initialize the environment
-            disp('Initializing environment...');
-            obj.environment.InitialiseEnvironment();  % Logic to initialize the environment
+            disp('Initialising environment...');
+            obj.environment.InitialiseEnvironment();  
+            disp('Enviornment Initialised');
 
             %%            
 
@@ -74,9 +87,13 @@ classdef LabBotMainControl
         %% Demonstration of Robot Control
         function DemonstrationControl(obj)
             clf;
+            disp('Demonstration Control Comencing')
                        
-            %% Initialisation of Enviorment 
-            obj.environment.InitialiseEnvironment();
+            %% Initialisation of Enviorment   
+            % Initialize the environment
+            disp('Initialising environment...');
+            obj.environment.InitialiseEnvironment();  
+            disp('Enviornment Initialised');
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
@@ -109,8 +126,8 @@ classdef LabBotMainControl
 
             
             % For LabBot
-            % obj.movementController.Move2Global(LabBot_Pos1, self.rLabBot);
-            % obj.movementController.Move2Global(LabBot_End, self.rLabBot);             
+            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
+            % obj.movementController.Move2Global(LabBot_End, obj.environment.rLabBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 
@@ -128,13 +145,18 @@ classdef LabBotMainControl
                               };
 
             % Call MixChem with 2 chemicals and mixing location 5
-            obj.GUI_Func.MixChem(self, 2, chemicals2mix2, 5)
+            obj.GUI_Func.MixChem(2, chemicals2mix2, 5)
                     
         end
 
         function WorkspaceCalculation(obj)
-            %% Initialisation of Enviorment 
-            obj.environment.InitialiseEnvironment();
+            disp('Workspace Calculation Comencing')
+
+            %% Initialisation of Enviorment   
+            % Initialize the environment
+            disp('Initialising environment...');
+            obj.environment.InitialiseEnvironment();  
+            disp('Enviornment Initialised');
 
             %% Workspace Calculation 
             obj.wrkspaceCalc.WorkspaceCalc();
