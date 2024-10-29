@@ -22,6 +22,7 @@ classdef LabBotMainControl
     %% Constructor method
     methods
         function obj = LabBotMainControl(controlCase) 
+            %% Initialise Enviornment
             obj.environment = LabBotEnvironment();
             disp('Initialising environment...');
             obj.environment.InitialiseEnvironment();  
@@ -82,6 +83,10 @@ classdef LabBotMainControl
                 case 5 % teach
                     % Call workspace calculation function
                     obj.GUITeach_CustomBot();
+
+                case 6 % teach
+                    % Call workspace calculation function
+                    obj.forceCollision();
 
                 % case 0 % Default initialization, no action
                 %     % Do nothing, simply return the class
@@ -154,7 +159,7 @@ classdef LabBotMainControl
 
             % obj.GUI_Func.GUITeachCustomBot();
 
-            obj.GUI_Func.GUICartesianUR3();
+            % obj.GUI_Func.GUICartesianUR3();
 
             % obj.GUI_Func.GUICartesianCustomBot();
             
@@ -193,7 +198,6 @@ classdef LabBotMainControl
         %% Demonstration of Robot Control
 
         function DemonstrationControl(obj)
-            
             disp('Demonstration Control Commencing')
 
             tableHeight = 1;
@@ -360,7 +364,7 @@ classdef LabBotMainControl
                 fprintf('\n');
                 
                 % Move robot back to return the test tube
-                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                obj.movementController.Move2Global(finishPos, 'UR3');
                 
                 % self.GripperOpen(); 
                 fprintf('Gripper opening to release test tube %d...\n', locationIndex);
@@ -381,6 +385,58 @@ classdef LabBotMainControl
             obj.GUI_Func.GUITeachCustomBot();
 
         end
+
+        function forceCollision(obj)
+            
+            disp('Demonstration Control Commencing')
+
+            tableHeight = 1;
+            xOffset = 1;
+            yOffset = 0;
+            zOffset = 0.075;
+
+            
+            %% Initialisation of Enviorment   
+            % Initialize the environment
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
+                              
+            %% Trasforms
+            % UR3 End Effector Goal Destinations 
+            % Cheecking for correct orientation
+            UR3_Pos1 = [1 , 0.5, tableHeight]; 
+            UR3_Pos2 = [1.2, 0.5, tableHeight];
+            
+              
+            % LabBot End Effector Goal Destinations 
+            % LabBot_Pos1 = [0.2,0.2,0.2];
+            % LabBot_End = [0.2,0.2,0.2];
+
+            
+            obj.isStopped = false;  % Reset E-Stop flag at the beginning
+
+            % Sample loop (replace this with your actual movement loop)
+            for i = 1:100
+                % Check for E-Stop
+                if obj.isStopped
+                    disp('E-Stop activated, stopping demonstration.');
+                    break;
+                end
+
+                %% Perform Movements
+                % Calling Move2Global using self
+                % For UR3
+                obj.movementController.Move2Global(UR3_Pos1, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos2, 'UR3');
+                
+                
+                % For LabBot
+                % obj.movementController.Move2Global(LabBot_Pos1, 'CustomBot');
+                % obj.movementController.Move2Global(LabBot_End, 'CustomBot');
+            end
+        end
+
     end
 
 end
