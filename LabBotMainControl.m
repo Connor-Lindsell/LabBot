@@ -28,7 +28,7 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
 
             % Retrieve the Table instance from environment and pass to movement control
-            obj.movementController = LabBotMovementControl(obj.environment.Table,obj.environment.rUR3);
+            obj.movementController = LabBotMovementControl(obj.environment.Table,obj.environment.rUR3,obj.environment.objects);
             
 
             % Initialise Parent classes

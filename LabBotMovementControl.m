@@ -6,13 +6,15 @@ classdef LabBotMovementControl
         rUR3
         rCustomBot
         table
+        objects
     end
 
     methods 
-        function obj = LabBotMovementControl (existingTable,RobotUR3)
+        function obj = LabBotMovementControl (existingTable, RobotUR3, objects)
             
             obj.table = existingTable;
             obj.rUR3 = RobotUR3;
+            obj.objects = objects;
             
             % obj.rUR3 = rUR3;
             % obj.rCustomBot = rCustomBot;
@@ -85,7 +87,7 @@ classdef LabBotMovementControl
         
             % Animate the robot moving to qPos
             for i = 1:numSteps
-                % Insert collision check here
+                % Plane Intersection Collision
                 if i > 1  % Skip for the first step since we have no previous position
                     previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
                     currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
@@ -98,6 +100,13 @@ classdef LabBotMovementControl
                     end
                 end
                 
+                % Ellipsoid Collision
+                currentPose = qMatrix(i, :);
+                if self.CheckEllipsoidCollision(robot.model.fkine(currentPose).T)
+                    warning('Collision detected with environment object. Stopping movement.');
+                    return;
+                end
+
                 robot.model.animate(qMatrix(i, :));
                 drawnow();
                 pause(0.02);  % Adjust pause for speed of animation
@@ -145,6 +154,13 @@ classdef LabBotMovementControl
                 % Check for self-collision during RMRC
                 if self.selfCollisionCheck(robot, currentConfig)
                     warning('Self-collision detected during RMRC! Stopping movement.');
+                    return;
+                end
+
+                % Ellipsoid Collision with objects
+                currentPose = qMatrix(i, :);
+                if self.CheckEllipsoidCollision(robot.model.fkine(currentPose).T)
+                    warning('Collision detected with environment object. Stopping movement.');
                     return;
                 end
 
@@ -428,19 +444,37 @@ classdef LabBotMovementControl
             end
         end
         
-        % Helper function to compute algebraic distance for ellipsoid collision
-        function algebraicDist = GetAlgebraicDist(self, point, center, radii)
-            % Calculate the algebraic distance of a point to the surface of an ellipsoid
-            % centered at 'center' with 'radii'
-            diff = (point - center) ./ radii;  % Normalize the point relative to ellipsoid axes
-            algebraicDist = sum(diff .^ 2);
-        end
-
+        
         %% Check Plane Collision
         function isCollision = CheckPlaneCollision(self, point1, point2)
             % This method checks for a collision between the line segment
             % from point1 to point2 and the plane defined in the table class.
             [isCollision, ~] = self.table.CheckCollisionWithPlane(point1, point2);
+        end
+
+        %% Ellipsoid Collision Check Function
+        function isCollision = CheckEllipsoidCollision(self, endEffectorTr)
+            isCollision = false;
+            endEffectorPos = endEffectorTr(1:3, 4).'; % Extract end-effector position
+
+            % Iterate over all objects and check for collisions
+            for objIndex = 1:length(self.objects)
+                currentObj = self.objects{objIndex};
+                dist = self.GetAlgebraicDist(endEffectorPos, currentObj.Center, currentObj.Radii);
+
+                % Check if within ellipsoid (algebraic distance < 1)
+                if dist < 1
+                    isCollision = true;
+                    return;
+                end
+            end
+        end
+
+        %% Get Algebraic Distance for Ellipsoids
+        function algebraicDist = GetAlgebraicDist(self, point, center, radii)
+            algebraicDist = ((point(1) - center(1)) / radii(1))^2 ...
+                          + ((point(2) - center(2)) / radii(2))^2 ...
+                          + ((point(3) - center(3)) / radii(3))^2;
         end
     end
 end
