@@ -2,6 +2,8 @@
 classdef Beaker < RobotBaseClass
         properties (Access = public)
             plyFileNameStem = 'Bbeaker';
+            baseTr = transl(0,0,0);
+            beakerModel;
         end
         methods
             function self = Beaker(baseTr)
@@ -9,6 +11,8 @@ classdef Beaker < RobotBaseClass
                     baseTr = transl(0,0,0);
                 end
                 self.CreateModel()
+           
+
 
                 self.model.base = self.model.base.T * baseTr ;
                 self.PlotAndColourRobot();
