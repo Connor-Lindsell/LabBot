@@ -22,6 +22,11 @@ classdef LabBotEnvironment < handle
             hold on;  % Keep the plot active for additional elements
             camlight;
             
+            %% Static Object Initialisation
+            PlaceObject('fireExtinguisher.ply', [2,2,0]);
+            PlaceObject('TPose.ply', [0,1.9,0]);
+            PlaceObject('BMan.ply', [0,1.5,0])
+
             %% Object Initialiastion         
             self.Table = Table();
             self.Beaker = Beaker(transl(1,0.5,1.5));
