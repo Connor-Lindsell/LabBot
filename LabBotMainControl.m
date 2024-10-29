@@ -63,12 +63,11 @@ classdef LabBotMainControl
                     
                 case 4 % teach
                     % Call workspace calculation function
-                    robot = obj.rUR3;
-                    obj.GUITeachUR3(robot);
+                    obj.GUITeach_UR3(robot);
 
                 case 5 % teach
                     % Call workspace calculation function
-                    obj.GUITeachCustomBot();
+                    obj.GUITeach_CustomBot();
     
     
                 otherwise
@@ -316,70 +315,18 @@ classdef LabBotMainControl
             end
         end
 
-        function GUITeachUR3(obj,robot)
-            % robot = obj.environment.rUR3;
-                    
-            %% Setup virtual teach pendant
-            pendant = GUI;   
-               
-            %% Infinite loop for teaching mode
-            while 1
-                % Read VTP values (joint angles in degrees)
-                wrench = pendant.read1;
-                
-                % Convert degrees to radians for each joint
-                q = deg2rad(wrench');
-        
-                % Display the joint angles in the command window
-                str = sprintf('--------------\n');
-                for i = 1:6
-                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
-                end
-                str = [str, sprintf('--------------\n')];
-                fprintf('%s', str);
-        
-                % Animate the robot with updated joint angles
-                robot.model.animate(q);
-        
-                % Pause briefly for real-time update (adjust as needed)
-                pause(0.05);
-
-            end           
+        function GUITeach_UR3(obj)
+            %% Call Teach Function 
+            robot = obj.environment.rUR3;
+            obj.GUI_Func.GUITeachUR3(robot);
+       
         end
 
-        function GUITeachCustomBot(obj)
+        function GUITeach_CustomBot(obj)
+            %% Call Teach Function 
             robot = obj.environment.rCustomBot;
-                    
-            %% Setup virtual teach pendant
-            pendant = GUI;   
-               
-            %% Infinite loop for teaching mode
-            while 1
-                % Read VTP values (joint angles in degrees)
-                watch = pendant.read2;
+            obj.GUI_Func.GUITeachCustomBot(robot);
 
-                q(1) = watch(1);
-                
-                % Convert degrees to radians for each joint
-                q(2:7) = deg2rad(watch(2:7)');
-        
-                disp(q);
-
-                % Display the joint angles in the command window
-                str = sprintf('--------------\n');
-                for i = 1:7
-                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
-                end
-                str = [str, sprintf('--------------\n')];
-                fprintf('%s', str);
-        
-                % Animate the robot with updated joint angles
-                robot.model.animate(q);
-        
-                % Pause briefly for real-time update (adjust as needed)
-                pause(0.05);
-
-            end           
         end
     end
 end
