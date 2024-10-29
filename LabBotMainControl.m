@@ -107,8 +107,9 @@ classdef LabBotMainControl
         end
 
         function checkEstop(obj)
-            if obj.isStopped
+            if obj.isStopped == true
                 disp('E-Stop detected - stopping all operations.');
+                return
             end
         end
 
@@ -225,9 +226,11 @@ classdef LabBotMainControl
 
             % Sample loop (replace this with your actual movement loop)
             for i = 1:100
+                % checkEstop(obj);
                 % Check for E-Stop
-                if obj.isStopped
+                if obj.guiApp.app.MomentaryButton.Value == true
                     disp('E-Stop activated, stopping demonstration.');
+                    % pause(0.5);
                     break;
                 end
 
@@ -311,11 +314,11 @@ classdef LabBotMainControl
         
         function MixChem(obj, numOfChem, chem2mix, mixingLocation)
             % Define test tube locations (you could adjust this as per your environment)
-            testTubeLocation = {[0.2, -0.2, 1.7], ...
-                                [0.2, -0.1, 1.7], ...
-                                [0.2, 0, 1.7], ...
-                                [0.2, 0.1, 1.7], ...
-                                [0.2, 0.2, 1.7]};
+            testTubeLocation = {[1.2, -0.2, 0.8], ...
+                                [1.2, -0.1, 0.8], ...
+                                [1.2, 0, 0.8], ...
+                                [1.2, 0.1, 0.8], ...
+                                [1.2, 0.2, 0.8]};
                             
             % Iterate over the number of chemicals to mix
             for i = 1:numOfChem
@@ -377,6 +380,7 @@ classdef LabBotMainControl
             obj.GUI_Func.GUITeachCustomBot();
 
         end
+        
     end
 
 end
