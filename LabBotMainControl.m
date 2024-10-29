@@ -26,7 +26,10 @@ classdef LabBotMainControl
 
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Trying to get the code to modularly work through classes
+            % % Tried to have the enviorment initalise in the constructor as
+            % well as the robot models, but for some reason i do this and
+            % get pos stops working for the robot models in demo control
+            % also trying to get the code to modularly work through classes
             % Didnt work howvere having too much trouble with robot
             % initialisation passing through gui to other classes
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,25 +50,25 @@ classdef LabBotMainControl
             % Switch based on the numeric control case provided
             switch controlCase
                 case 1 % GUI
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call GUI interface function
                     obj.GUI_InterfaceControl();
                         
                 case 2 % Demo
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call SimultaneousControl function
                     obj.DemonstrationControl();
     
                 case 3 % Calc
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call workspace calculation function
                     obj.WorkspaceCalculation();
+                    
+                case 4 % teach
+                    % Call workspace calculation function
+                    obj.GUITeach_UR3();
+
+                case 5 % teach
+                    % Call workspace calculation function
+                    obj.GUITeach_CustomBot();
+    
     
                 otherwise
                     % Debugging Line
@@ -89,13 +92,19 @@ classdef LabBotMainControl
             % Create the GUI
             obj.guiApp = GUI();  
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Attempting to send the objects to the gui app but then was
+            % getting errors saying to many inputs, couldnt find a solution
+            % so moved functions to this class from gui functions
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Set robot properties in GUI after creation
-            obj.GUI_Func.rUR3 = obj.rUR3;
-            obj.GUI_Func.rCustomBot = obj.rCustomBot;
+            % obj.GUI_Func.rUR3 = obj.rUR3;
+            % obj.GUI_Func.rCustomBot = obj.rCustomBot;
 
             % Optionally, call startupFcn if necessary to initialize further
             % obj.guiApp.startupFcn();
-                        
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
             %% Environment  
             % Initialize the environment
             disp('Initialising environment...');
@@ -103,10 +112,9 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Listening function not working
+            % Errors: have to comment out which one you dont want out 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Call Listening function 
-            % robot = self.rUR3;
             % robot = obj.environment.rUR3;
             % obj.GUI_Func.GUITeachUR3(robot);
 
@@ -150,9 +158,9 @@ classdef LabBotMainControl
             clf;
             disp('Demonstration Control Commencing')
             
-            obj.rCustomBot = CustomBot(transl(-1,0,1.5));
-            obj.rUR3 = UR3(transl(0,0,1.5));
-
+            % obj.rCustomBot = CustomBot(transl(-1,0,1.5));
+            % obj.rUR3 = UR3(transl(0,0,1.5));
+            % 
             %% Initialisation of Enviorment   
             % Initialize the environment
             disp('Initialising environment...');
@@ -189,8 +197,8 @@ classdef LabBotMainControl
             obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
             
             % For LabBot
-            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
-            % obj.movementController.Move2Global(LabBot_End, obj.environment.rLabBot);             
+            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rCustomBot);
+            % obj.movementController.Move2Global(LabBot_End, obj.environment.rCustomBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 
@@ -217,11 +225,11 @@ classdef LabBotMainControl
         function WorkspaceCalculation(obj)
             disp('Workspace Calculation Comencing')
 
-            %% Initialisation of Enviorment   
-            % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            % %% Initialisation of Enviorment   
+            % % Initialize the environment
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
 
             %% Workspace Calculation 
             %% UR3 Calculation
@@ -307,6 +315,19 @@ classdef LabBotMainControl
             end
         end
 
+        function GUITeach_UR3(obj)
+            %% Call Teach Function 
+            robot = obj.environment.rUR3;
+            obj.GUI_Func.GUITeachUR3(robot);
+       
+        end
+
+        function GUITeach_CustomBot(obj)
+            %% Call Teach Function 
+            robot = obj.environment.rCustomBot;
+            obj.GUI_Func.GUITeachCustomBot(robot);
+
+        end
     end
 end
  
