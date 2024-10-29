@@ -5,10 +5,15 @@ classdef LabBotMovementControl
 
         rUR3
         rCustomBot
+        table
     end
 
     methods 
-        function obj = LabBotMovementControl ()
+        function obj = LabBotMovementControl (existingTable,RobotUR3)
+            
+            obj.table = existingTable;
+            obj.rUR3 = RobotUR3;
+            
             % obj.rUR3 = rUR3;
             % obj.rCustomBot = rCustomBot;
             
@@ -26,14 +31,14 @@ classdef LabBotMovementControl
         
         function Move2Global(self, finishTr, robot)
 
-            % switch robot
-            %     case 'UR3'
-            %         robot = obj.rUR3;
-            %     case 'LabBot'
-            %         robot = obj.rLabBot;
-            %     otherwise
-            %         error('Unknown robot specified.');
-            % end
+            switch robot
+                case 'UR3'
+                    robot = self.rUR3;
+                case 'LabBot'
+                    robot = self.rLabBot;
+                otherwise
+                    error('Unknown robot specified.');
+            end
 
             % Calculate the target orientation using RollPitchYawCalc
             rpy = self.RollPitchYawCalc(finishTr);
@@ -73,6 +78,9 @@ classdef LabBotMovementControl
             fprintf(']\n');
             fprintf('\n');
         
+            disp(robot);  % Ensure robot is a valid object with the expected properties
+            disp(robot.model);  % Ensure model property exists
+
             % Animate from current position to qPos (initial joint configuration)
             currentJointConfig = robot.model.getpos();  % Get current joint configuration
             numSteps = 50;  % Number of steps for smooth animation to qPos
@@ -80,10 +88,17 @@ classdef LabBotMovementControl
         
             % Animate the robot moving to qPos
             for i = 1:numSteps
-                % Check for self-collision during the movement
-                if self.selfCollisionCheck(robot, qMatrix(i, :))
-                    warning('Self-collision detected! Stopping movement.');
-                    return;
+                % Insert collision check here
+                if i > 1  % Skip for the first step since we have no previous position
+                    previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
+                    currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
+                    
+                    % Perform collision check
+                    isCollision = self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos);
+                    if isCollision
+                        warning('Collision detected with the table! Stopping movement.');
+                        return;
+                    end
                 end
                 
                 robot.model.animate(qMatrix(i, :));
@@ -358,7 +373,7 @@ classdef LabBotMovementControl
              end 
         end
 
-        %% Collision Checking 
+        %% Self Collision Checking 
         % collision checking for the Robot arm 
         function isCollision = selfCollisionCheck(self, robot, q)
             % Collision checking between non-adjacent links using ellipsoids
@@ -405,6 +420,13 @@ classdef LabBotMovementControl
             % centered at 'center' with 'radii'
             diff = (point - center) ./ radii;  % Normalize the point relative to ellipsoid axes
             algebraicDist = sum(diff .^ 2);
+        end
+
+        %% Check Plane Collision
+        function isCollision = CheckPlaneCollision(self, point1, point2)
+            % This method checks for a collision between the line segment
+            % from point1 to point2 and the plane defined in the table class.
+            [isCollision, ~] = self.table.CheckCollisionWithPlane(point1, point2);
         end
     end
 end

@@ -8,6 +8,7 @@ classdef LabBotEnvironment < handle
         Cube;
         rUR3
         rCustomBot
+        movementController
 
 
     end
@@ -44,6 +45,10 @@ classdef LabBotEnvironment < handle
             % Initaialising Robot Models
             self.rUR3 = UR3(transl(1,0,tableHeight),true,'Gripper');
             self.rCustomBot = CustomBot(transl(-0.5,0,tableHeight), true, 'CGripper');
+
+            % Pass Table to Movement Controller
+            % existingTable = self.Table;
+            % self.movementController = LabBotMovementControl(existingTable);  % Use existing table
 
             
             %% Base transforms

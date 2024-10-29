@@ -17,7 +17,7 @@ classdef GUI_Functions
     methods
         function obj = GUI_Functions()
             % Use the provided environment object instead of creating a new one
-            obj.movementController = LabBotMovementControl();
+            % obj.movementController = LabBotMovementControl();
             
             % obj.rUR3 = rUR3;
             % obj.rCustomBot = rCustomBot;

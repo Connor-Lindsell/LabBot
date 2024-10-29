@@ -2,31 +2,35 @@ classdef Table < RobotBaseClass
 
 properties (Access = public)
     plyFileNameStem = 'Table';
+
+    planeNormal = [0, 0, 1];  % Normal vector of the table's top surface
+    pointOnPlane = [0, 0, 0.8];  % A point on the plane at table height
 end
 
-methods
-%% Constructor
-function self = Table(baseTr)
-            
+    methods
+        %% Constructor
+        function self = Table(baseTr)
             if nargin < 1
-                    baseTr = eye(4);  % Origin Point
-            end            
-
+                baseTr = eye(4);  % Origin Point
+            end
             self.CreateModel();
-
-			self.model.base = self.model.base.T * baseTr;  
-            
+            self.model.base = self.model.base.T * baseTr;
             self.PlotAndColourRobot();
-     
-
             drawnow
         end
 
-%% CreateModel
+        %% CreateModel
         function CreateModel(self)
                 L(1) = Link('d', 10,'a',0,'alpha',-pi/2,'qlim',[deg2rad(-270) deg2rad(270)], 'offset',0);
                 self.model = SerialLink(L,'name',self.name);
         end    
+
+        %% Collision Check with Plane
+        function [isCollision, intersectionPoint] = CheckCollisionWithPlane(self, point1, point2)
+            % Check if the line segment between point1 and point2 intersects the plane
+            [intersectionPoint, check] = LinePlaneIntersection(self.planeNormal, self.pointOnPlane, point1, point2);
+            isCollision = (check == 1);  % True if there's an intersection within the segment
+        end
     end
 end
 
