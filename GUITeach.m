@@ -1,7 +1,7 @@
 function GUITeach()
     %% Robot Initialisation
     % Initaialising Robot Model
-    robot = CustomBot;
+    robot = UR3;
 
     %% Scene Initialisation
     axis([-2 2 -2 2 0 4]);  % Set the axis limits to fit all objects in the environment
@@ -19,10 +19,10 @@ function GUITeach()
     %% Infinite loop for teaching mode
     while 1
         % Read VTP values (joint angles in degrees)
-        rench = pendant.read;
+        wrench = pendant.read;
         
         % Convert degrees to radians for each joint
-        q = deg2rad(rench');
+        q = deg2rad(wrench');
 
         % Display the joint angles in the command window
         str = sprintf('--------------\n');
