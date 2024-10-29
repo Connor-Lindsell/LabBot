@@ -201,7 +201,7 @@ classdef LabBotMainControl
         function DemonstrationControl(obj)
             disp('Demonstration Control Commencing')
 
-            tableHeight = 1;
+            tableHeight = 0.9;
             xOffset = 1;
             yOffset = 0;
             zOffset = 0.075;
@@ -216,14 +216,14 @@ classdef LabBotMainControl
             %% Trasforms
             % UR3 End Effector Goal Destinations 
             % Cheecking for correct orientation
-            UR3_Pos1 = [0.3+xOffset ,0.2,tableHeight+zOffset]; % positive x Q++
+            UR3_Pos1 = [0+xOffset ,0.5,tableHeight+zOffset]; % positive x Q++
             UR3_Pos2 = [-0.3+xOffset,0.2,tableHeight+zOffset]; % negative x Q-+
             UR3_Pos3 = [0.2+xOffset,0.3,tableHeight+zOffset]; % positive y Q++
             UR3_Pos4 = [0.2+xOffset,-0.3,tableHeight+zOffset]; % negative y Q+-
             UR3_Pos5 = [0.3+xOffset,-0.2,tableHeight+zOffset]; % positive x Q+-
             UR3_Pos6 = [-0.3+xOffset,-0.2,tableHeight+zOffset]; % negative x Q--
             UR3_Pos7 = [-0.2+xOffset,0.3,tableHeight+zOffset]; % positive y Q-+
-            UR3_Pos8 = [-0.2+xOffset,-0.3,tableHeight+zOffset]; % negative y Q--
+            UR3_Pos8 = [0.6+xOffset,-0.3,tableHeight+zOffset]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
             % LabBot_Pos1 = [0.2,0.2,0.2];
@@ -236,7 +236,7 @@ classdef LabBotMainControl
             for i = 1:100
                 % checkEstop(obj);
                 % Check for E-Stop
-                if obj.guiApp.app.MomentaryButton.Value == true
+                if obj.isStopped == true
                     disp('E-Stop activated, stopping demonstration.');
                     % pause(0.5);
                     break;
@@ -322,9 +322,9 @@ classdef LabBotMainControl
         
         function MixChem(obj, numOfChem, chem2mix, mixingLocation)
             % Define test tube locations (you could adjust this as per your environment)
-            testTubeLocation = {[1.2, -0.2, 0.8], ...
-                                [1.2, -0.1, 0.8], ...
-                                [1.2, 0, 0.8], ...
+            testTubeLocation = {[1, 0.5, 0.8], ...
+                                [1.2, 0.5, 0.8], ...
+                                [1.4, 0.5, 0.8], ...
                                 [1.2, 0.1, 0.8], ...
                                 [1.2, 0.2, 0.8]};
                             
