@@ -18,7 +18,7 @@ classdef GUI_Functions
         function obj = GUI_Functions()
             % Use the provided environment object instead of creating a new one
             obj.movementController = LabBotMovementControl();
-
+            
             % obj.rUR3 = rUR3;
             % obj.rCustomBot = rCustomBot;
 
@@ -38,6 +38,9 @@ classdef GUI_Functions
             %     disp('rUR3 initialized successfully.');
             % end
             % Proceed with Move2Global calls
+
+            rUR3 = obj.rUR3;
+            rCustomBot = obj.rCustomBot;
                        
             
             %% Transforms

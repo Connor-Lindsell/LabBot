@@ -8,9 +8,9 @@ classdef LabBotMovementControl
     end
 
     methods 
-        function obj = LabBotMovementControl (rUR3, rCustomBot)
-            obj.rUR3 = rUR3;
-            obj.rCustomBot = rCustomBot;
+        function obj = LabBotMovementControl ()
+            % obj.rUR3 = rUR3;
+            % obj.rCustomBot = rCustomBot;
             
         end
     end
