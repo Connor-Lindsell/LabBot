@@ -165,161 +165,120 @@ classdef GUI_Functions
             robot = self.rUR3;
             
             %% Setup virtual teach pendant
-            pendant = TestTeach;   
-        
-        
-            %% Infinite loop for teaching mode
-            while 1
+            pendant = TestTeach;
             
-                % Read VTP values
+            % Initialize initial robot configuration 'q'
+            q = [0 0 0 0 0 0];
+            
+            % Configurable duration and time step
+            duration = 300;  % seconds
+            dt = 0.5;        % seconds
+        
+            % Define admittance and DLS gain parameters
+            Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);
+            lambda = 0.1;
+        
+            %% Infinite loop for teaching mode with user-controlled break
+            while true
+                % Read virtual teach pendant values
                 rench = pendant.read;
                 
-                q = [0 0 0 0 0 0];                 % Set initial robot configuration 'q'
-            
-                duration = 300;  % Set duration of the simulation (seconds)
-                dt = 0.5;      % Set time step for simulation (seconds)
-                
-                n = 0;  % Initialise step count to zero 
-                tic;    % recording simulation start time
-                while( toc < duration)
+                % Simulation time
+                tic;
+                for n = 1:(duration/dt)
+                    % Combined force-torque vector
+                    f = [rench(1:3); rench(4:6)];
+        
+                    % Print pendant values to command window
+                    fprintf('Force X:%01.3f Y:%01.3f Z:%01.3f | Torque X:%01.3f Y:%01.3f Z:%01.3f\n', ...
+                        rench(1), rench(2), rench(3), rench(4), rench(5), rench(6));
                     
-                    n=n+1; % increment step count
-            
-                    
-                    
-                    % Print buttons/axes info to command window
-                    str = sprintf('--------------\n');
-                    str = [str sprintf('Force  X:%01.3f\n',rench(1))];
-                    str = [str sprintf('Force  Y:%01.3f\n',rench(2))];
-                    str = [str sprintf('Force  Z:%01.3f\n',rench(3))];
-                    str = [str sprintf('Torque X:%01.3f\n',rench(4))];
-                    str = [str sprintf('Torque Y:%01.3f\n',rench(5))];
-                    str = [str sprintf('Torque Z:%01.3f\n',rench(6))];
-                    str = [str sprintf('--------------\n')];
-                    fprintf('%s',str);
-                    pause(0.05);  
-                
-                    fx = rench(1);
-                    fy = rench(2);
-                    fz = rench(3);
-                    
-                    tx = rench(4);
-                    ty = rench(5);
-                    tz = rench(6);
-                    
-                    f = [fx;fy;fz;tx;ty;tz]; % combined force-torque vector (wwrench)
-                    
-                    % 2 - use simple admittance scheme to convert force measurement into
-                    % velocity command
-                    Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]); % admittance gain matrix  
-                    dx = Ka*f; % convert wwrench into end-effector velocity command
-                    
-                    % 2 - use DLS J inverse to calculate joint velocity
+                    % Convert force measurement to end-effector velocity command
+                    dx = Ka * f;
+        
+                    % Use DLS J inverse to calculate joint velocity
                     J = robot.model.jacobe(q);
-                    
-                    lambda = 0.1;
-                    Jinv_dls = inv((J'*J)+lambda^2*eye(6))*J';
-                    dq = Jinv_dls*dx;
-                    
-                    % 3 - apply joint velocity to step robot joint angles
-                    q = q + dq'*dt;
-                    
-                    
-                    % Update plot
-                    robot.model.animate(q);  
-                    
-                    % wait until loop time elapsed
-                    if (toc > dt*n)
-                        warning('Loop %i took too much time - consider increating dt',n);
+                    Jinv_dls = inv(J' * J + lambda^2 * eye(6)) * J';
+                    dq = Jinv_dls * dx;
+        
+                    % Step robot joint angles
+                    q = q + dq' * dt;
+        
+                    % Animate the robot
+                    robot.model.animate(q);
+                    drawnow();
+        
+                    % Timing control
+                    if toc > dt * n
+                        warning('Loop %i took too long - consider increasing dt.', n);
                     end
-
-                    while (toc < dt*n) % wait until loop time (dt) has elapsed 
+        
+                    while toc < dt * n
+                        % Waiting for the loop time to elapse
                     end
                 end
             end
-        end
+        end 
 
         function GUICartesianCustomBot(obj)
             robot = self.rCustomBot;
             
             %% Setup virtual teach pendant
-            pendant = TestTeach;   
+            pendant = TestTeach;
+            
+            % Initialize initial robot configuration 'q'
+            q = [0 0 0 0 0 0];
+            
+            % Configurable duration and time step
+            duration = 300;  % seconds
+            dt = 0.5;        % seconds
         
+            % Define admittance and DLS gain parameters
+            Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);
+            lambda = 0.1;
         
-            %% Infinite loop for teaching mode
-            while 1
-            
-                % Read VTP values
-                atch = pendant.read;
+            %% Infinite loop for teaching mode with user-controlled break
+            while true
+                % Read virtual teach pendant values
+                rench = pendant.read;
                 
-                q = [0 0 0 0 0 0];                 % Set initial robot configuration 'q'
-            
-                                
-                
-                duration = 300;  % Set duration of the simulation (seconds)
-                dt = 0.5;      % Set time step for simulation (seconds)
-                
-                n = 0;  % Initialise step count to zero 
-                tic;    % recording simulation start time
-
-                while( toc < duration)
+                % Simulation time
+                tic;
+                for n = 1:(duration/dt)
+                    % Combined force-torque vector
+                    f = [rench(1:3); rench(4:6)];
+        
+                    % Print pendant values to command window
+                    fprintf('Force X:%01.3f Y:%01.3f Z:%01.3f | Torque X:%01.3f Y:%01.3f Z:%01.3f\n', ...
+                        rench(1), rench(2), rench(3), rench(4), rench(5), rench(6));
                     
-                    n=n+1; % increment step count
-            
-                    
-                    
-                    % Print buttons/axes info to command window
-                    str = sprintf('--------------\n');
-                    str = [str sprintf('Force  X:%01.3f\n',atch(1))];
-                    str = [str sprintf('Force  Y:%01.3f\n',atch(2))];
-                    str = [str sprintf('Force  Z:%01.3f\n',atch(3))];
-                    str = [str sprintf('Torque X:%01.3f\n',atch(4))];
-                    str = [str sprintf('Torque Y:%01.3f\n',atch(5))];
-                    str = [str sprintf('Torque Z:%01.3f\n',atch(6))];
-                    str = [str sprintf('--------------\n')];
-                    fprintf('%s',str);
-                    pause(0.05);  
-                
-                    fx = atch(1);
-                    fy = atch(2);
-                    fz = atch(3);
-                    
-                    tx = atch(4);
-                    ty = atch(5);
-                    tz = atch(6);
-                    
-                    f = [fx;fy;fz;tx;ty;tz]; % combined force-torque vector (wwrench)
-                    
-                    % 2 - use simple admittance scheme to convert force measurement into
-                    % velocity command
-                    Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]); % admittance gain matrix  
-                    dx = Ka*f; % convert wwrench into end-effector velocity command
-                    
-                    % 2 - use DLS J inverse to calculate joint velocity
+                    % Convert force measurement to end-effector velocity command
+                    dx = Ka * f;
+        
+                    % Use DLS J inverse to calculate joint velocity
                     J = robot.model.jacobe(q);
-                    
-                    lambda = 0.1;
-                    Jinv_dls = inv((J'*J)+lambda^2*eye(6))*J';
-                    dq = Jinv_dls*dx;
-                    
-                    % 3 - apply joint velocity to step robot joint angles
-                    q = q + dq'*dt;
-                    
-                    
-                    % Update plot
-                    robot.model.animate(q);  
-                    
-                    % wait until loop time elapsed
-                    if (toc > dt*n)
-                        warning('Loop %i took too much time - consider increating dt',n);
+                    Jinv_dls = inv(J' * J + lambda^2 * eye(6)) * J';
+                    dq = Jinv_dls * dx;
+        
+                    % Step robot joint angles
+                    q = q + dq' * dt;
+        
+                    % Animate the robot
+                    robot.model.animate(q);
+                    drawnow();
+        
+                    % Timing control
+                    if toc > dt * n
+                        warning('Loop %i took too long - consider increasing dt.', n);
                     end
-                    
-                    while (toc < dt*n) % wait until loop time (dt) has elapsed 
+        
+                    while toc < dt * n
+                        % Waiting for the loop time to elapse
                     end
                 end
             end
-        end
-        
+        end 
+
         %%
         % Enable control method
         % function enableControl(obj)
