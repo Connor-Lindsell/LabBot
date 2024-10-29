@@ -9,21 +9,93 @@ classdef GUI_Functions
 
         % Initialise Robot models variables
         rUR3
-        rLabBot
+        rCustomBot
 
     end
 
-    %% Constructor method
+    % Constructor method
     methods
-        function obj = GUI_Functions
-            % Initialise Parent classes 
+        function obj = GUI_Functions()
+            % Use the provided environment object instead of creating a new one
             obj.movementController = LabBotMovementControl();
-            obj.environment = LabBotEnvironment();
+            
+            % obj.rUR3 = rUR3;
+            % obj.rCustomBot = rCustomBot;
+
         end
     end
    
     %% Functions
     methods 
+
+        function DemonstrationControl(obj)
+            clf;
+            disp('Demonstration Control Commencing')
+
+            % if isempty(obj.environment.rUR3)
+            %     error('rUR3 is not initialized. Please check environment initialization.');
+            % else
+            %     disp('rUR3 initialized successfully.');
+            % end
+            % Proceed with Move2Global calls
+
+            rUR3 = obj.rUR3;
+            rCustomBot = obj.rCustomBot;
+                       
+            
+            %% Transforms
+            % UR3 End Effector Goal Destinations 
+            % Cheecking for correct orientation
+            UR3_Pos1 = [0.3,0.2,1.6]; % positive x Q++
+            UR3_Pos2 = [-0.3,0.2,1.6]; % negative x Q-+
+            UR3_Pos3 = [0.2,0.3,1.6]; % positive y Q++
+            UR3_Pos4 = [0.2,-0.3,1.6]; % negative y Q+-
+            UR3_Pos5 = [0.3,-0.2,1.6]; % positive x Q+-
+            UR3_Pos6 = [-0.3,-0.2,1.6]; % negative x Q--
+            UR3_Pos7 = [-0.2,0.3,1.6]; % positive y Q-+
+            UR3_Pos8 = [-0.2,-0.3,1.6]; % negative y Q--
+              
+            % LabBot End Effector Goal Destinations 
+            % LabBot_Pos1 = [0.2,0.2,0.2];
+            % LabBot_End = [0.2,0.2,0.2];
+
+
+            %% Perform Movements
+            % Calling Move2Global using self
+            % For UR3
+            obj.movementController.Move2Global(UR3_Pos1, obj.rUR3);
+            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+
+            
+            % For LabBot
+            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
+            % obj.movementController.Move2Global(LabBot_End, obj.environment.rLabBot);             
+
+            %% Mix Chemicals 
+            % Not nessecary while testing optimisation 
+            % Define chemicals to mix and their test tube locations
+            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
+                              {'Iodine', 2}, ... 
+                              {'Nitrogen', 4} ...
+                              };
+
+            % Call MixChem with 3 chemicals and mixing location 3
+            self.MixChem( 3, chemicals2mix1, 3)
+
+            chemicals2mix2 = {{'New Mixture', 3}, ... 
+                              {'Nitrogen', 4} ...
+                              };
+
+            % Call MixChem with 2 chemicals and mixing location 5
+            self.MixChem(2, chemicals2mix2, 5)
+                    
+        end
 
         function GUITeachUR3(obj, robot)
             
@@ -228,64 +300,7 @@ classdef GUI_Functions
             end
         end
 
-        function DemonstrationControl(obj)
-            clf;
-            disp('Demonstration Control Commencing')
-                       
-            
-            %% Transforms
-            % UR3 End Effector Goal Destinations 
-            % Cheecking for correct orientation
-            UR3_Pos1 = [0.3,0.2,1.6]; % positive x Q++
-            UR3_Pos2 = [-0.3,0.2,1.6]; % negative x Q-+
-            UR3_Pos3 = [0.2,0.3,1.6]; % positive y Q++
-            UR3_Pos4 = [0.2,-0.3,1.6]; % negative y Q+-
-            UR3_Pos5 = [0.3,-0.2,1.6]; % positive x Q+-
-            UR3_Pos6 = [-0.3,-0.2,1.6]; % negative x Q--
-            UR3_Pos7 = [-0.2,0.3,1.6]; % positive y Q-+
-            UR3_Pos8 = [-0.2,-0.3,1.6]; % negative y Q--
-              
-            % LabBot End Effector Goal Destinations 
-            % LabBot_Pos1 = [0.2,0.2,0.2];
-            % LabBot_End = [0.2,0.2,0.2];
-
-
-            %% Perform Movements
-            % Calling Move2Global using self
-            % For UR3
-            obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
-
-            
-            % For LabBot
-            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
-            % obj.movementController.Move2Global(LabBot_End, obj.environment.rLabBot);             
-
-            %% Mix Chemicals 
-            % Not nessecary while testing optimisation 
-            % Define chemicals to mix and their test tube locations
-            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
-                              {'Iodine', 2}, ... 
-                              {'Nitrogen', 4} ...
-                              };
-
-            % Call MixChem with 3 chemicals and mixing location 3
-            self.MixChem( 3, chemicals2mix1, 3)
-
-            chemicals2mix2 = {{'New Mixture', 3}, ... 
-                              {'Nitrogen', 4} ...
-                              };
-
-            % Call MixChem with 2 chemicals and mixing location 5
-            self.MixChem(2, chemicals2mix2, 5)
-                    
-        end
+        
 
     end 
 

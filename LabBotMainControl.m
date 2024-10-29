@@ -17,13 +17,26 @@ classdef LabBotMainControl
 
     %% Constructor method
     methods
-        function obj = LabBotMainControl(controlCase)
-            % Initialise Parent classes 
-            obj.movementController = LabBotMovementControl();
-            obj.environment = LabBotEnvironment();
-            obj.GUI_Func = GUI_Functions();
+        function obj = LabBotMainControl(controlCase) 
+            % Initialise Parent classes
             obj.wrkspaceCalc = LabBotCalculations();
+            obj.environment = LabBotEnvironment();
+            obj.GUI_Func = GUI_Functions(); 
+            obj.movementController = LabBotMovementControl();
 
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment(); 
+            % hold on;
+            % disp('Enviornment Initialised');
+
+            % Initialize robots here directly
+            % obj.rUR3 = UR3(transl(0,0,1.5));
+            % obj.rCustomBot = CustomBot(transl(-1,0,1.5));
+            
+            % obj.GUI_Func.rUR3 = obj.rUR3;      
+            % obj.GUI_Func.rCustomBot = obj.rCustomBot;
+            
+            
                 
             % Switch based on the numeric control case provided
             switch controlCase
@@ -68,13 +81,20 @@ classdef LabBotMainControl
         
             %% Create GUI
             % Create the GUI
-            obj.guiApp = GUI();  % Start GUI
+            obj.guiApp = GUI();  
+
+            % Set robot properties in GUI after creation
+            obj.GUI_Func.rUR3 = obj.rUR3;
+            obj.GUI_Func.rCustomBot = obj.rCustomBot;
+
+            % Optionally, call startupFcn if necessary to initialize further
+            % obj.guiApp.startupFcn();
                         
             %% Environment  
             % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
 
             % Initaialising Robot Models
             % self.rUR3 = UR3(transl(0,0,1.5));
@@ -115,7 +135,10 @@ classdef LabBotMainControl
         function DemonstrationControl(obj)
             clf;
             disp('Demonstration Control Commencing')
-                       
+            
+            obj.rCustomBot = CustomBot(transl(-1,0,1.5));
+            obj.rUR3 = UR3(transl(0,0,1.5));
+
             %% Initialisation of Enviorment   
             % Initialize the environment
             disp('Initialising environment...');
@@ -142,14 +165,16 @@ classdef LabBotMainControl
             %% Perform Movements
             % Calling Move2Global using self
             % For UR3
+
             obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
-            % obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
+            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+
 
             
             % For LabBot
