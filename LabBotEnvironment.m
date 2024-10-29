@@ -30,8 +30,8 @@ classdef LabBotEnvironment < handle
 
             %% Robot Initialisation
             % Initaialising Robot Models
-            self.rUR3 = UR3(transl(0,0,1.5));
-            self.rCustomBot = CustomBot(transl(-1,0,1.5));
+            % self.rUR3 = UR3(transl(0,0,1.5));
+            % self.rCustomBot = CustomBot(transl(-1,0,1.5));
 
             
             %% Base transforms

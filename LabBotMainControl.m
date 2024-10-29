@@ -17,13 +17,24 @@ classdef LabBotMainControl
 
     %% Constructor method
     methods
-        function obj = LabBotMainControl(controlCase)
-            % Initialise Parent classes 
-            obj.movementController = LabBotMovementControl();
-            obj.environment = LabBotEnvironment();
-            obj.GUI_Func = GUI_Functions();
+        function obj = LabBotMainControl(controlCase) 
+            % Initialise Parent classes
             obj.wrkspaceCalc = LabBotCalculations();
+            obj.environment = LabBotEnvironment();
+            obj.GUI_Func = GUI_Functions(); 
 
+            disp('Initialising environment...');
+            obj.environment.InitialiseEnvironment();  
+            disp('Enviornment Initialised');
+
+            % Initialize robots here directly
+            obj.rUR3 = UR3(transl(0,0,1.5));
+            obj.rCustomBot = CustomBot(transl(-1,0,1.5));
+            
+            obj.GUI_Func.rUR3 = obj.rUR3;      
+            obj.GUI_Func.rCustomBot = obj.rCustomBot;
+            
+            obj.movementController = LabBotMovementControl(obj.rUR3, obj.rCustomBot);
                 
             % Switch based on the numeric control case provided
             switch controlCase
@@ -68,13 +79,20 @@ classdef LabBotMainControl
         
             %% Create GUI
             % Create the GUI
-            obj.guiApp = GUI();  % Start GUI
+            obj.guiApp = GUI();  
+
+            % Set robot properties in GUI after creation
+            obj.guiApp.rUR3 = obj.rUR3;
+            obj.guiApp.rCustomBot = obj.rCustomBot;
+
+            % Optionally, call startupFcn if necessary to initialize further
+            % obj.guiApp.startupFcn();
                         
             %% Environment  
             % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
 
             % Initaialising Robot Models
             % self.rUR3 = UR3(transl(0,0,1.5));
@@ -118,9 +136,9 @@ classdef LabBotMainControl
                        
             %% Initialisation of Enviorment   
             % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
                               
             %% Trasforms
             % UR3 End Effector Goal Destinations 
