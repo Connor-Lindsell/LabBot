@@ -234,6 +234,12 @@ classdef GUI_Functions
         end
 
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Tried to make the function called from gui function class but haD
+        % to many problems with the initalisation of the robot carring
+        % through the gui app
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
         %% Mix Chemical Function 
         % Selects Chemicals and then mixes the chemicals by pouring them
         % together
@@ -299,6 +305,8 @@ classdef GUI_Functions
                 fprintf('\n');
             end
         end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         
 

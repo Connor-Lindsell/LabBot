@@ -24,6 +24,9 @@ classdef LabBotMainControl
             obj.GUI_Func = GUI_Functions(); 
             obj.movementController = LabBotMovementControl();
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Trying to get the code to modularly work through classes %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % disp('Initialising environment...');
             % obj.environment.InitialiseEnvironment(); 
             % hold on;
@@ -35,7 +38,7 @@ classdef LabBotMainControl
             
             % obj.GUI_Func.rUR3 = obj.rUR3;      
             % obj.GUI_Func.rCustomBot = obj.rCustomBot;
-            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
                 
             % Switch based on the numeric control case provided
@@ -92,14 +95,13 @@ classdef LabBotMainControl
                         
             %% Environment  
             % Initialize the environment
-            % disp('Initialising environment...');
-            % obj.environment.InitialiseEnvironment();  
-            % disp('Enviornment Initialised');
-
-            % Initaialising Robot Models
-            % self.rUR3 = UR3(transl(0,0,1.5));
-            % self.rCustomBot = CustomBot(transl(-1,0,1.5));
-
+            disp('Initialising environment...');
+            obj.environment.InitialiseEnvironment();  
+            disp('Enviornment Initialised');
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Listening function not working
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Call Listening function 
             % robot = self.rUR3;
             % robot = obj.environment.rUR3;
@@ -107,7 +109,12 @@ classdef LabBotMainControl
 
             % robot = obj.environment.rCustomBot;
             % obj.GUI_Func.GUITeachCustomBot(robot);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Parallel listenesr so bothj teachs could wokr at the same
+            % time - Not Woring took too long
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Call Listening functions in parallel
             % pool = gcp('nocreate');  % Get current parallel pool
             % if isempty(pool)
@@ -118,15 +125,19 @@ classdef LabBotMainControl
             % futureUR3 = parfeval(pool, @obj.GUI_Func.GUITeachUR3, 0, robotUR3);
             % futureCustomBot = parfeval(pool, @obj.GUI_Func.GUITeachCustomBot, 0, robotCustomBot);
             % 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             %% Wait for Gui          
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % relates back to parellel pool 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Cancel parallel tasks if GUI is closed
             % cancel(futureUR3);
             % cancel(futureCustomBot);
-
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
         end                
 
@@ -165,7 +176,6 @@ classdef LabBotMainControl
             %% Perform Movements
             % Calling Move2Global using self
             % For UR3
-
             obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
             obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
             obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
@@ -174,8 +184,6 @@ classdef LabBotMainControl
             obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
             obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
             obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
-
-
             
             % For LabBot
             % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
