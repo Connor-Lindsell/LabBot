@@ -85,8 +85,8 @@ classdef LabBotMainControl
             % robot = obj.environment.rUR3;
             % obj.GUI_Func.GUITeachUR3(robot);
 
-            robot = obj.environment.rCustomBot;
-            obj.GUI_Func.GUITeachCustomBot(robot);
+            % robot = obj.environment.rCustomBot;
+            % obj.GUI_Func.GUITeachCustomBot(robot);
 
             %% Call Listening functions in parallel
             % pool = gcp('nocreate');  % Get current parallel pool
@@ -104,8 +104,8 @@ classdef LabBotMainControl
             uiwait(obj.guiApp.UIFigure);
 
             % Cancel parallel tasks if GUI is closed
-            cancel(futureUR3);
-            cancel(futureCustomBot);
+            % cancel(futureUR3);
+            % cancel(futureCustomBot);
 
   
         end                
