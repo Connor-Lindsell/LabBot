@@ -63,7 +63,7 @@ classdef LabBotMainControl
                     
                 case 4 % teach
                     % Call workspace calculation function
-                    obj.GUITeach_UR3(robot);
+                    obj.GUITeach_UR3();
 
                 case 5 % teach
                     % Call workspace calculation function
