@@ -53,8 +53,7 @@ classdef LabBotEnvironment < handle
             % Define ellipsoid properties for each object
             self.objects = {struct('Center', [1, 0.5, tableHeight], 'Radii', [0.1, 0.1, 0.2]), ...  % BeakerA
                             struct('Center', [1.3, 0.2, tableHeight], 'Radii', [0.1, 0.1, 0.2]), ... % BeakerB
-                            struct('Center', [1.5, -0.5, tableHeight], 'Radii', [0.15, 0.15, 0.25]), ... % Conical
-                            struct('Center', [0, 0, tableHeight + 0.4], 'Radii', [1, 1, 0.1])}; % Table
+                            struct('Center', [1.5, -0.5, tableHeight], 'Radii', [0.15, 0.15, 0.25])}; % Conical
         
 
             %% Robot Initialisation
