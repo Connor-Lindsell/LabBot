@@ -28,7 +28,7 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
 
             % Retrieve the Table instance from environment and pass to movement control
-            obj.movementController = LabBotMovementControl(obj.environment.Table,obj.environment.rUR3);
+            obj.movementController = LabBotMovementControl(obj.environment.Table,obj.environment.rUR3,obj.environment.objects);
             
 
             % Initialise Parent classes
@@ -238,16 +238,16 @@ classdef LabBotMainControl
                 % For UR3
                 obj.movementController.Move2Global(UR3_Pos1, 'UR3');
                 obj.movementController.Move2Global(UR3_Pos2, 'UR3');
-                obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
-                obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
-                obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
-                obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
-                obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
-                obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos3, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos4, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos5, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos6, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos7, 'UR3');
+                obj.movementController.Move2Global(UR3_Pos8, 'UR3');
                 
                 % For LabBot
-                % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rCustomBot);
-                % obj.movementController.Move2Global(LabBot_End, obj.environment.rCustomBot);             
+                % obj.movementController.Move2Global(LabBot_Pos1, 'CustomBot');
+                % obj.movementController.Move2Global(LabBot_End, 'CustomBot');             
     
                 %% Mix Chemicals 
                 % Not nessecary while testing optimisation 
@@ -332,7 +332,7 @@ classdef LabBotMainControl
                 finishPos = testTubeLocation{locationIndex};  % Test tube location 
                 
                 % Move UR3 to the test tube
-                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                obj.movementController.Move2Global(finishPos, 'UR3');
                 
                 % self.GripperClose();
                 fprintf('Gripper closing to pick up %s...\n', chemical);
@@ -344,7 +344,7 @@ classdef LabBotMainControl
                 fprintf('\n');
                 
                 % Move robot to the mixing location with the chemical
-                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                obj.movementController.Move2Global(finishPos, 'UR3');
                 
                 %% Mix Chem
                 % self.PourChem(); 
