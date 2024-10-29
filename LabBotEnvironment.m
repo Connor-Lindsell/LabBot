@@ -35,6 +35,13 @@ classdef LabBotEnvironment < handle
             PlaceObject('emergencyStopWallMounted.ply', [1,2,0])
             PlaceObject('TPose.ply', [0,1.9,0]);
             PlaceObject('BMan.ply', [0,1.5,0])
+            % PlaceTransparentObject('TPose.ply', [0,0,1]); % Ghost
+
+            PlaceObject('Enclosure.ply', [0,0,0])
+            PlaceTransparentObject('Window.ply',[0,0,0]);
+            PlaceTransparentObject('Door.ply',[0,0,0]); % Door Closed
+            % PlaceTransparentObject('Door.ply',[1.8,0,0]); % Door Opened
+           
 
             %% Object Initialiastion         
             self.Table = Table();
