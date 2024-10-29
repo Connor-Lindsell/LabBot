@@ -1,9 +1,12 @@
 classdef LabBotEnvironment < handle
    
     properties 
-        Conical;
+        ConicalA;
+        ConicalB;
+        ConicalC;
         BeakerA;
         BeakerB;
+        BeakerC;
         Table;
         Cube;
         rUR3
@@ -46,8 +49,11 @@ classdef LabBotEnvironment < handle
             %% Object Initialiastion         
             self.Table = Table();
             self.BeakerA = Beaker(transl(1,0.5,tableHeight));
-            self.BeakerB = Beaker(transl(1.3,0.2,tableHeight));
-            self.Conical = Conical(-1,0.5,tableHeight);
+            self.BeakerB = Beaker(transl(1.2,0.5,tableHeight));
+            self.BeakerC = Beaker(transl(1.4,0.5,tableHeight));
+            self.ConicalA = Conical(transl(-1,0.5,tableHeight));
+            self.ConicalB = Conical(transl(-1.2,0.5,tableHeight));
+            self.ConicalC = Conical(transl(-1.4,0.5,tableHeight));
             % self.Cube = Cube;
 
             % Define ellipsoid properties for each object
