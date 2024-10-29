@@ -38,14 +38,14 @@ classdef CustomBot < RobotBaseClass
             end             
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);  
-            self.model.plotopt = {'nojoints', 'noname', 'noshadow', 'nowrist','noarrow', 'nojaxes'};
+            % self.model.plotopt = {'nojoints', 'noname', 'noshadow', 'nowrist','noarrow', 'nojaxes'};
 
             self.PlotAndColourRobot();
 
-            % 
+
             % workspace = [-2 2 -2 2 -0 2];                                       % Set the size of the workspace when drawing the robot        
             % scale = 0.5;        
-            % q = zeros(1,5);                                                     % Create a vector of initial joint angles        
+            % q = zeros(1,7);                                                     % Create a vector of initial joint angles        
             % self.model.plot(q,'workspace',workspace,'scale',scale);
             % self.model.teach();
 
@@ -57,11 +57,11 @@ classdef CustomBot < RobotBaseClass
         function CreateModel(self)
             link(1) = Link([pi     0       0       pi/2    1]); % PRISMATIC Link
             link(2) = Link('d',0.15,'a',0.1,'alpha',pi);
-            link(3) = Link('d',-0.1,'a',0,'alpha',-pi/2);
-            link(4) = Link('d',0,'a',0.4,'alpha',pi);
-            link(5) = Link('d',0,'a',0,'alpha',pi/2);
-            link(6) = Link('d',0.01,'a',0.5,'alpha',-pi/2);
-            % link(7) = Link('d',	0.0921,'a',0,'alpha',0);
+            link(3) = Link('d',-0.1,'a',0,'alpha',pi/2);
+            link(4) = Link('d',0,'a',0.4,'alpha',0);
+            link(5) = Link('d',0,'a',0,'alpha', pi/2);
+            link(6) = Link('d',0.5,'a',0,'alpha', -pi/2);
+            link(7) = Link('d',	0,'a',0.2,'alpha',0);
 
          
 
@@ -73,14 +73,18 @@ classdef CustomBot < RobotBaseClass
             link(4).qlim = [-360 360]*pi/180;
             link(5).qlim = [-360 360]*pi/180;
             link(6).qlim = [-360 360]*pi/180;
+            % link(7).qlim = [-360 360]*pi/180;
             % Link(7).qlim = [-Inf, Inf] %(continous rotation)
 
             % Link offsets
             % link(2).offset = pi/2;
             % link(3).offset = pi;
             % link(4).offset = pi/2;
-            % link(5).offset = pi/2;
-            % 
+            link(5).offset = pi/2;
+            % link(6).offset = pi/2;
+            link(7).offset = -pi/2;
+
+           
             self.model = SerialLink(link,'name', self.name);
         end    
         end      
