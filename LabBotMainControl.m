@@ -198,7 +198,7 @@ classdef LabBotMainControl
             tableHeight = 1;
             xOffset = 1;
             yOffset = 0;
-            zOffset = 0.15;
+            zOffset = 0.075;
 
             
             %% Initialisation of Enviorment   

@@ -3,8 +3,8 @@ classdef Table < RobotBaseClass
 properties (Access = public)
     plyFileNameStem = 'Table';
 
-    planeNormal = [0, 0, 1];  % Normal vector of the table's top surface
-    pointOnPlane = [0, 0, 0.8];  % A point on the plane at table height
+    planeNormal = [0, 0, 0.8];  % Normal vector of the table's top surface
+    pointOnPlane = [1, 1, 0.8];  % A point on the plane at table height
 end
 
     methods
