@@ -2,7 +2,8 @@ classdef LabBotEnvironment < handle
    
     properties 
         Conical;
-        Beaker;
+        BeakerA;
+        BeakerB;
         Table;
         Cube;
         rUR3
@@ -29,13 +30,14 @@ classdef LabBotEnvironment < handle
 
             %% Object Initialiastion         
             self.Table = Table();
-            self.Beaker = Beaker(transl(1,0.5,1.5));
+            self.BeakerA = Beaker(transl(1,0.5,1.5));
+            self.BeakerB = Beaker(transl(1.3,0.2,1.5));
             self.Conical = Conical(-1,0.5,1.5);
             % self.Cube = Cube;
 
             %% Robot Initialisation
             % Initaialising Robot Models
-            self.rUR3 = UR3(transl(0,0,1.5));
+            self.rUR3 = UR3(transl(1,0,1.5),true,'Gripper');
             self.rCustomBot = CustomBot(transl(-1,0,1.5));
 
             

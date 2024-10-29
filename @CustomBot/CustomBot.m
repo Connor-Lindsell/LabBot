@@ -12,30 +12,31 @@ classdef CustomBot < RobotBaseClass
     
     methods
 %% Constructor
-        function self = CustomBot(baseTr)
-            % if nargin < 3
-            %     if nargin == 2
-            %         error('If you set useTool you must pass in the toolFilename as well');
-            %     elseif nargin == 0 % Nothing passed
-            %         baseTr = transl(0,0,0);  
-            %     end             
-            % else % All passed in 
-            %     self.useTool = useTool;
-            %     toolTrData = load([toolFilename,'.mat']);
-            %     self.toolTr = toolTrData.tool;
-            %     self.toolFilename = [toolFilename,'.ply'];
-            % end
-            % 
-            % self.CreateModel();
-			% self.model.base = self.model.base.T * baseTr;
-            % self.model.tool = self.toolTr;
-            % self.PlotAndColourRobot();
+        function self = CustomBot(baseTr,useTool,toolFilename)
+            if nargin < 3
+                if nargin == 2
+                    error('If you set useTool you must pass in the toolFilename as well');
+                elseif nargin == 0 % Nothing passed
+                    baseTr = transl(0,0,0);  
+                end             
+            else % All passed in 
+                self.useTool = useTool;
+                toolTrData = load([toolFilename,'.mat']);
+                self.toolTr = toolTrData.tool;
+                self.toolFilename = [toolFilename,'.ply'];
+            end
+
+            self.CreateModel();
+			self.model.base = self.model.base.T * baseTr;
+            self.model.tool = self.toolTr;
+            self.PlotAndColourRobot();
 
 
                         
-            if nargin < 1
-                    baseTr = eye(4);  % Origin Point
-            end             
+            % if nargin < 1
+            %         baseTr = eye(4);  % Origin Point
+            % end           
+
             self.CreateModel();
 			self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);  
             % self.model.plotopt = {'nojoints', 'noname', 'noshadow', 'nowrist','noarrow', 'nojaxes'};
@@ -61,7 +62,7 @@ classdef CustomBot < RobotBaseClass
             link(4) = Link('d',0,'a',0.4,'alpha',0);
             link(5) = Link('d',0,'a',0,'alpha', pi/2);
             link(6) = Link('d',0.5,'a',0,'alpha', -pi/2);
-            link(7) = Link('d',	0,'a',0.2,'alpha',0);
+            link(7) = Link('d',	0,'a',0.3,'alpha',0);
 
          
 
@@ -73,7 +74,7 @@ classdef CustomBot < RobotBaseClass
             link(4).qlim = [-360 360]*pi/180;
             link(5).qlim = [-360 360]*pi/180;
             link(6).qlim = [-360 360]*pi/180;
-            % link(7).qlim = [-360 360]*pi/180;
+            link(7).qlim = [-360 360]*pi/180;
             % Link(7).qlim = [-Inf, Inf] %(continous rotation)
 
             % Link offsets
