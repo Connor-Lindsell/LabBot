@@ -25,9 +25,9 @@ for q1 = qlim(1,1):stepLin:qlim(1,2)
                     % q5 = 0;
                         %for q6 = qlim(6,1):stepRads:qlim(6,2)
                             q6 = 0;
-                                % q7=0;
+                                q7=0;
                      
-                        q = [q1,q2,q3,q4,q5,q6];
+                        q = [q1,q2,q3,q4,q5,q6,q7];
                         tr = robot.model.fkine(q).T;  
                         %if tr(3,4)' > -1
                         pointCloud(counter,:) = tr(1:3,4)';

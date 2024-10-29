@@ -31,6 +31,7 @@ classdef LabBotEnvironment < handle
             
             %% Static Object Initialisation
             PlaceObject('fireExtinguisher.ply', [2,2,0]);
+            PlaceObject('emergencyStopWallMounted.ply', [1,2,0])
             PlaceObject('TPose.ply', [0,1.9,0]);
             PlaceObject('BMan.ply', [0,1.5,0])
 
