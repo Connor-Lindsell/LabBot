@@ -87,7 +87,7 @@ classdef LabBotMainControl
         end
 
         function startEstopListener(obj)
-            % Create a timer to continuously check the E-Stop button
+            % Timer to monitor E-Stop state
             obj.estopTimer = timer('ExecutionMode', 'fixedRate', ...
                                    'Period', 0.1, ...
                                    'TimerFcn', @(~,~)obj.checkEstop());
@@ -95,15 +95,13 @@ classdef LabBotMainControl
         end
 
         function checkEstop(obj)
-            % Check if the E-Stop button in the GUI is pressed
-            if obj.guiApp.Button_2.Value  % Assuming Button_2 is the E-Stop button
-                obj.isStopped = true;     % Set the E-Stop flag
-                disp('E-Stop activated!');
+            if obj.isStopped
+                disp('E-Stop detected - stopping all operations.');
             end
         end
 
         function delete(obj)
-            % Stop the timer if the MainControl object is deleted
+            % Stop the timer
             stop(obj.estopTimer);
             delete(obj.estopTimer);
         end
@@ -194,9 +192,6 @@ classdef LabBotMainControl
             yOffset = 0;
 
             
-            % obj.rCustomBot = CustomBot(transl(-1,0,1.5));
-            % obj.rUR3 = UR3(transl(0,0,1.5));
-            % 
             %% Initialisation of Enviorment   
             % Initialize the environment
             disp('Initialising environment...');
@@ -219,41 +214,53 @@ classdef LabBotMainControl
             % LabBot_Pos1 = [0.2,0.2,0.2];
             % LabBot_End = [0.2,0.2,0.2];
 
-
-            %% Perform Movements
-            % Calling Move2Global using self
-            % For UR3
-            obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
             
-            % For LabBot
-            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rCustomBot);
-            % obj.movementController.Move2Global(LabBot_End, obj.environment.rCustomBot);             
+            obj.isStopped = false;  % Reset E-Stop flag at the beginning
 
-            %% Mix Chemicals 
-            % Not nessecary while testing optimisation 
-            % Define chemicals to mix and their test tube locations
-            chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
-                              {'Iodine', 2}, ... 
-                              {'Nitrogen', 4} ...
-                              };
+            % Sample loop (replace this with your actual movement loop)
+            for i = 1:100
+                % Check for E-Stop
+                if obj.isStopped
+                    disp('E-Stop activated, stopping demonstration.');
+                    break;
+                end
 
-            % Call MixChem with 3 chemicals and mixing location 3
-            obj.MixChem( 3, chemicals2mix1, 3)
-
-            chemicals2mix2 = {{'New Mixture', 3}, ... 
-                              {'Nitrogen', 4} ...
-                              };
-
-            % Call MixChem with 2 chemicals and mixing location 5
-            obj.MixChem(2, chemicals2mix2, 5)
-                    
+                %% Perform Movements
+                % Calling Move2Global using self
+                % For UR3
+                obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
+                obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+                
+                % For LabBot
+                % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rCustomBot);
+                % obj.movementController.Move2Global(LabBot_End, obj.environment.rCustomBot);             
+    
+                %% Mix Chemicals 
+                % Not nessecary while testing optimisation 
+                % Define chemicals to mix and their test tube locations
+                chemicals2mix1 = {{'Bromine', 1}, ...  % Notice the use of curly braces
+                                  {'Iodine', 2}, ... 
+                                  {'Nitrogen', 4} ...
+                                  };
+    
+                % Call MixChem with 3 chemicals and mixing location 3
+                obj.MixChem( 3, chemicals2mix1, 3)
+    
+                chemicals2mix2 = {{'New Mixture', 3}, ... 
+                                  {'Nitrogen', 4} ...
+                                  };
+    
+                % Call MixChem with 2 chemicals and mixing location 5
+                obj.MixChem(2, chemicals2mix2, 5)
+                pause(0.1);  % Simulating time-consuming task
+            end
+                   
         end
 
         %% Workspace Calculation 
