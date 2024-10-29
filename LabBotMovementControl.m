@@ -10,10 +10,11 @@ classdef LabBotMovementControl
     end
 
     methods 
-        function obj = LabBotMovementControl (existingTable, RobotUR3, objects)
+        function obj = LabBotMovementControl (existingTable, RobotUR3, objects, CustomBot)
             
             obj.table = existingTable;
             obj.rUR3 = RobotUR3;
+            obj.rCustomBot = CustomBot;
             obj.objects = objects;
             
             % obj.rUR3 = rUR3;
