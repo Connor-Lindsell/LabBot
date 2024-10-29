@@ -26,7 +26,9 @@ classdef LabBotMainControl
 
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Trying to get the code to modularly work through classes %
+            % Trying to get the code to modularly work through classes
+            % Didnt work howvere having too much trouble with robot
+            % initialisation passing through gui to other classes
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % disp('Initialising environment...');
             % obj.environment.InitialiseEnvironment(); 
