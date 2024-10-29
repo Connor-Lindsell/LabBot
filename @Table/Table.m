@@ -24,7 +24,7 @@ function self = Table(baseTr)
 
 %% CreateModel
         function CreateModel(self)
-                L(1) = Link('d', 1.5,'a',0,'alpha',-pi/2,'qlim',[deg2rad(-270) deg2rad(270)], 'offset',0);
+                L(1) = Link('d', 10,'a',0,'alpha',-pi/2,'qlim',[deg2rad(-270) deg2rad(270)], 'offset',0);
                 self.model = SerialLink(L,'name',self.name);
         end    
     end

@@ -160,7 +160,7 @@ classdef LabBotMainControl
             clf;
             disp('Demonstration Control Commencing')
 
-            tableHeight = 1.5;
+            tableHeight = 1;
             xOffset = 1;
             yOffset = 0;
 
