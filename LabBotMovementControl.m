@@ -78,9 +78,6 @@ classdef LabBotMovementControl
             fprintf(']\n');
             fprintf('\n');
         
-            disp(robot);  % Ensure robot is a valid object with the expected properties
-            disp(robot.model);  % Ensure model property exists
-
             % Animate from current position to qPos (initial joint configuration)
             currentJointConfig = robot.model.getpos();  % Get current joint configuration
             numSteps = 50;  % Number of steps for smooth animation to qPos
@@ -150,6 +147,23 @@ classdef LabBotMovementControl
                     warning('Self-collision detected during RMRC! Stopping movement.');
                     return;
                 end
+
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Made RMRC failed because took too long
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Check for Table collision during RMRC
+                % if i > 1  % Skip for the first step since we have no previous position
+                %     previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
+                %     currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
+                % 
+                %     % Perform collision check
+                %     isCollision = self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos);
+                %     if isCollision
+                %         warning('Collision detected with the table! Stopping movement.');
+                %         return;
+                %     end
+                % end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
                 % Check if the matrix becomes singular
                 if abs(det(intermediateTransform)) < 1e-10
