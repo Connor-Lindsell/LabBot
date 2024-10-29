@@ -8,12 +8,17 @@ classdef LabBotEnvironment < handle
         Cube;
         rUR3
         rCustomBot
+
+
     end
     
     methods
         function InitialiseEnvironment(self) 
             clf;
-            
+
+            tableHeight = 0.8; 
+
+
             %% Scene Initialisation
             axis([-3 3 -3 3 0 3]);  % Set the axis limits to fit all objects in the environment
             xlabel('X-axis');  % Label the X-axis
@@ -30,15 +35,15 @@ classdef LabBotEnvironment < handle
 
             %% Object Initialiastion         
             self.Table = Table();
-            self.BeakerA = Beaker(transl(1,0.5,1.5));
-            self.BeakerB = Beaker(transl(1.3,0.2,1.5));
-            self.Conical = Conical(-1,0.5,1.5);
+            self.BeakerA = Beaker(transl(1,0.5,tableHeight));
+            self.BeakerB = Beaker(transl(1.3,0.2,tableHeight));
+            self.Conical = Conical(-1,0.5,tableHeight);
             % self.Cube = Cube;
 
             %% Robot Initialisation
             % Initaialising Robot Models
-            self.rUR3 = UR3(transl(1,0,1.5),true,'Gripper');
-            self.rCustomBot = CustomBot(transl(-1,0,1.5));
+            self.rUR3 = UR3(transl(1,0,tableHeight),true,'Gripper');
+            self.rCustomBot = CustomBot(transl(-0.5,0,tableHeight), true, 'CGripper');
 
             
             %% Base transforms
