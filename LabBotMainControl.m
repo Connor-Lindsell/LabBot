@@ -13,6 +13,10 @@ classdef LabBotMainControl
 
         % Initialise GUI 
         guiApp
+
+        % E-Stop Properties
+        isStopped = false;     
+        estopTimer                 
     end 
 
     %% Constructor method
@@ -24,6 +28,8 @@ classdef LabBotMainControl
             obj.GUI_Func = GUI_Functions(); 
             obj.movementController = LabBotMovementControl();
 
+            % Start the E-Stop listener
+            obj.startEstopListener();
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % % Tried to have the enviorment initalise in the constructor as
@@ -77,6 +83,29 @@ classdef LabBotMainControl
                     % If an unknown case is provided, display an error message
                     error('Unknown control case specified: %d', controlCase);
             end
+                    
+        end
+
+        function startEstopListener(obj)
+            % Create a timer to continuously check the E-Stop button
+            obj.estopTimer = timer('ExecutionMode', 'fixedRate', ...
+                                   'Period', 0.1, ...
+                                   'TimerFcn', @(~,~)obj.checkEstop());
+            start(obj.estopTimer);
+        end
+
+        function checkEstop(obj)
+            % Check if the E-Stop button in the GUI is pressed
+            if obj.guiApp.Button_2.Value  % Assuming Button_2 is the E-Stop button
+                obj.isStopped = true;     % Set the E-Stop flag
+                disp('E-Stop activated!');
+            end
+        end
+
+        function delete(obj)
+            % Stop the timer if the MainControl object is deleted
+            stop(obj.estopTimer);
+            delete(obj.estopTimer);
         end
     end
 
@@ -118,8 +147,8 @@ classdef LabBotMainControl
             % robot = obj.environment.rUR3;
             % obj.GUI_Func.GUITeachUR3(robot);
 
-            robot = obj.environment.rCustomBot;
-            obj.GUI_Func.GUITeachCustomBot(robot);
+            % robot = obj.environment.rCustomBot;
+            % obj.GUI_Func.GUITeachCustomBot(robot);
 
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,5 +365,6 @@ classdef LabBotMainControl
 
         end
     end
+
 end
  
