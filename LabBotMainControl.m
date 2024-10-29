@@ -198,6 +198,7 @@ classdef LabBotMainControl
             tableHeight = 1;
             xOffset = 1;
             yOffset = 0;
+            zOffset = 0.15;
 
             
             %% Initialisation of Enviorment   
@@ -209,14 +210,14 @@ classdef LabBotMainControl
             %% Trasforms
             % UR3 End Effector Goal Destinations 
             % Cheecking for correct orientation
-            UR3_Pos1 = [0.3+xOffset ,0.2,tableHeight]; % positive x Q++
-            UR3_Pos2 = [-0.3+xOffset,0.2,tableHeight]; % negative x Q-+
-            UR3_Pos3 = [0.2+xOffset,0.3,tableHeight]; % positive y Q++
-            UR3_Pos4 = [0.2+xOffset,-0.3,tableHeight]; % negative y Q+-
-            UR3_Pos5 = [0.3+xOffset,-0.2,tableHeight]; % positive x Q+-
-            UR3_Pos6 = [-0.3+xOffset,-0.2,tableHeight]; % negative x Q--
-            UR3_Pos7 = [-0.2+xOffset,0.3,tableHeight]; % positive y Q-+
-            UR3_Pos8 = [-0.2+xOffset,-0.3,tableHeight]; % negative y Q--
+            UR3_Pos1 = [0.3+xOffset ,0.2,tableHeight+zOffset]; % positive x Q++
+            UR3_Pos2 = [-0.3+xOffset,0.2,tableHeight+zOffset]; % negative x Q-+
+            UR3_Pos3 = [0.2+xOffset,0.3,tableHeight+zOffset]; % positive y Q++
+            UR3_Pos4 = [0.2+xOffset,-0.3,tableHeight+zOffset]; % negative y Q+-
+            UR3_Pos5 = [0.3+xOffset,-0.2,tableHeight+zOffset]; % positive x Q+-
+            UR3_Pos6 = [-0.3+xOffset,-0.2,tableHeight+zOffset]; % negative x Q--
+            UR3_Pos7 = [-0.2+xOffset,0.3,tableHeight+zOffset]; % positive y Q-+
+            UR3_Pos8 = [-0.2+xOffset,-0.3,tableHeight+zOffset]; % negative y Q--
               
             % LabBot End Effector Goal Destinations 
             % LabBot_Pos1 = [0.2,0.2,0.2];

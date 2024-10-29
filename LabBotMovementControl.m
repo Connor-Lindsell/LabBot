@@ -1,7 +1,7 @@
 classdef LabBotMovementControl
     
     properties 
-        steps = 100;
+        steps = 25;
 
         rUR3
         rCustomBot
@@ -41,6 +41,9 @@ classdef LabBotMovementControl
                 otherwise
                     error('Unknown robot specified.');
             end
+
+            % Define home position (initial joint configuration)
+            homePosition = zeros(1, robot.model.n);  % Assuming zero configuration as home
 
             % Calculate the target orientation using RollPitchYawCalc
             rpy = self.RollPitchYawCalc(finishTr);
@@ -87,32 +90,25 @@ classdef LabBotMovementControl
         
             % Animate the robot moving to qPos
             for i = 1:numSteps
-                % Plane Intersection Collision
+                % Check for Plane and Ellipsoid collisions
                 if i > 1  % Skip for the first step since we have no previous position
                     previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
                     currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
                     
-                    % Perform collision check
-                    isCollision = self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos);
-                    if isCollision
+                    % Plane collision check
+                    if self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos)
                         warning('Collision detected with the table! Stopping movement.');
+                        self.returnToHome(robot, currentJointConfig, homePosition); % Return to home position
                         return;
                     end
                 end
-                
-                % Ellipsoid Collision
-                currentPose = qMatrix(i, :);
-                if self.CheckEllipsoidCollision(robot.model.fkine(currentPose).T)
-                    warning('Collision detected with environment object. Stopping movement.');
-                    return;
-                end
-
+                                               
                 robot.model.animate(qMatrix(i, :));
                 drawnow();
                 pause(0.02);  % Adjust pause for speed of animation
             end
         
-            fprintf('Stage 1 complete, starting RMRC for orientation and fine position...\n\n');
+            fprintf('Stage 1 complete, continuing with orientation...\n\n');
         
             %% Stage 2: RMRC for fine orientation and position adjustment
             % RMRC parameters
@@ -157,13 +153,7 @@ classdef LabBotMovementControl
                     return;
                 end
 
-                % Ellipsoid Collision with objects
-                currentPose = qMatrix(i, :);
-                if self.CheckEllipsoidCollision(robot.model.fkine(currentPose).T)
-                    warning('Collision detected with environment object. Stopping movement.');
-                    return;
-                end
-
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Made RMRC failed because took too long
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -252,6 +242,214 @@ classdef LabBotMovementControl
         
             % Display movement complete
             fprintf("*********************************MOVEMENT COMPLETE*********************************\n\n");
+
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % With collision
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % %% Stage 1: Position IK
+            % % Get initial guess based on quadrant
+            % initialGuess = self.GetInitialGuess(finishTr);
+            % 
+            % % Define the mask for position only [111000]
+            % maskS1 = [1 1 1 0 0 0];
+            % 
+            % % Solve inverse kinematics for position using the initial guess
+            % qPos = robot.model.ikine(targetTransform, 'q0', initialGuess, 'mask', maskS1);
+            % 
+            % % Handle errors or failures in position IK
+            % if isempty(qPos)
+            %     warning('Stage 1 IK failed to find a solution.');
+            %     return;
+            % end
+            % 
+            % qPosAngles = rad2deg(qPos);
+            % 
+            % % Display qPos
+            % fprintf('Initial qPos (Stage 1 solution) = \n');
+            % fprintf('\n [');
+            % 
+            % fprintf('  %.5f  ', qPos);  % Display all joint angles in a row
+            % fprintf(']\n');
+            % fprintf('\n [');
+            % 
+            % fprintf('  %.5f  ', qPosAngles);  % Display all joint angles in a row (degrees)
+            % fprintf(']\n');
+            % fprintf('\n');
+            % 
+            % % Animate from current position to qPos (initial joint configuration)
+            % currentJointConfig = robot.model.getpos();  % Get current joint configuration
+            % numSteps = 50;  % Number of steps for smooth animation to qPos
+            % qMatrix = jtraj(currentJointConfig, qPos, numSteps);  % Trajectory from current position to qPos
+            % 
+            % % Animate the robot moving to qPos
+            % for i = 1:numSteps
+            %     % Check for Plane and Ellipsoid collisions
+            %     if i > 1  % Skip for the first step since we have no previous position
+            %         previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
+            %         currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
+            % 
+            %         % Plane collision check
+            %         if self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos)
+            %             warning('Collision detected with the table! Stopping movement.');
+            %             self.returnToHome(robot, currentJointConfig, homePosition); % Return to home position
+            %             return;
+            %         end
+            %     end
+            % 
+            %     % Ellipsoid collision check
+            %     if self.CheckEllipsoidCollision(robot.model.fkine(qMatrix(i, :)).T)
+            %         warning('Collision detected with environment object! Stopping movement.');
+            %         self.returnToHome(robot, currentJointConfig, homePosition); % Return to home position
+            %         return;
+            %     end
+            % 
+            %     robot.model.animate(qMatrix(i, :));
+            %     drawnow();
+            %     pause(0.02);  % Adjust pause for speed of animation
+            % end
+            % 
+            % fprintf('Stage 1 complete, continuing with orientation...\n\n');
+            % 
+            % %% Stage 2: RMRC for fine orientation and position adjustment
+            % % RMRC parameters
+            % deltaT = 0.02;  % Control frequency (time step for RMRC)
+            % RMRCsteps = 100;  % Number of increments
+            % epsilon = 0.1;  % Threshold for manipulability/Damped Least Squares
+            % W = diag([1 1 1 0.1 0.1 0.1]);  % Weighting matrix for the velocity vector
+            % 
+            % % Get the initial configuration and current transform from Stage 1
+            % currentConfig = qPos;  % Start from qPos from Stage 1
+            % currentTransform = robot.model.fkine(currentConfig);
+            % 
+            % % Extract initial and target translation and rotation
+            % initialPos = transl(currentTransform).';  % 3x1 vector
+            % targetPos = transl(targetTransform);      % 3x1 vector
+            % initialRot = t2r(currentTransform);       % 3x3 matrix
+            % targetRot = t2r(targetTransform);         % 3x3 matrix
+            % 
+            % % Linear interpolation for position increments
+            % deltaPos = (targetPos - initialPos) / RMRCsteps;
+            % 
+            % % Compute the incremental rotation matrix for each step
+            % deltaRot = (targetRot * initialRot')^(1 / RMRCsteps);  % Rotation increment
+            % 
+            % % Initialize the current rotation matrix
+            % currentRot = initialRot;
+            % 
+            % % RMRC loop over the given steps
+            % for i = 1:RMRCsteps
+            %     % Update the position incrementally
+            %     currentPos = initialPos + i * deltaPos;  % 3x1 vector
+            % 
+            %     % Update the rotation incrementally using matrix multiplication
+            %     currentRot = deltaRot * currentRot;  % Maintain orthogonality
+            % 
+            %     % Construct the intermediate target transform
+            %     intermediateTransform = rt2tr(currentRot, currentPos);
+            % 
+            %     % Check for self-collision during RMRC
+            %     if self.selfCollisionCheck(robot, currentConfig)
+            %         warning('Self-collision detected during RMRC! Stopping movement.');
+            %         return;
+            %     end
+            % 
+            %     % Ellipsoid Collision with objects
+            %     currentPose = qMatrix(i, :);
+            %     if self.CheckEllipsoidCollision(robot.model.fkine(currentPose).T)
+            %         warning('Collision detected with environment object. Stopping movement.');
+            %         return;
+            %     end
+            % 
+            %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %     % Made RMRC failed because took too long
+            %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %     % Check for Table collision during RMRC
+            %     % if i > 1  % Skip for the first step since we have no previous position
+            %     %     previousEndEffectorPos = transl(robot.model.fkine(qMatrix(i - 1, :)));
+            %     %     currentEndEffectorPos = transl(robot.model.fkine(qMatrix(i, :)));
+            %     % 
+            %     %     % Perform collision check
+            %     %     isCollision = self.CheckPlaneCollision(previousEndEffectorPos, currentEndEffectorPos);
+            %     %     if isCollision
+            %     %         warning('Collision detected with the table! Stopping movement.');
+            %     %         return;
+            %     %     end
+            %     % end
+            %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % 
+            %     % Check if the matrix becomes singular
+            %     if abs(det(intermediateTransform)) < 1e-10
+            %         warning('Matrix is singular or near-singular at step %d. Skipping this step.', i);
+            %         continue;
+            %     end
+            % 
+            %     % Compute the position error and orientation error
+            %     deltaX = targetPos - transl(currentTransform).';
+            %     Rd = targetRot;
+            %     Ra = t2r(currentTransform);
+            %     Rdot = (1 / deltaT) * (Rd - Ra);
+            %     S = Rdot * Ra';
+            % 
+            %     % Compute linear and angular velocities
+            %     linear_velocity = (1 / deltaT) * deltaX;
+            %     angular_velocity = [S(3, 2); S(1, 3); S(2, 1)];
+            % 
+            %     % Compute end-effector velocity
+            %     xdot = W * [linear_velocity; angular_velocity];
+            % 
+            %     % Compute Jacobian and manipulability
+            %     J = robot.model.jacob0(currentConfig);
+            %     m = sqrt(det(J * J'));
+            %     if m < epsilon
+            %         lambda = (1 - m / epsilon) * 5E-2;
+            %     else
+            %         lambda = 0;
+            %     end
+            %     invJ = inv(J' * J + lambda * eye(6)) * J';
+            % 
+            %     % Solve for the next joint velocities
+            %     qdot = (invJ * xdot).';
+            % 
+            %     % Update joint configuration
+            %     currentConfig = currentConfig + deltaT * qdot;
+            % 
+            %     % Animate the robot to the new configuration
+            %     robot.model.animate(currentConfig);
+            %     drawnow();
+            %     pause(deltaT);
+            % 
+            %     % Update the current transform for the next iteration
+            %     currentTransform = robot.model.fkine(currentConfig);
+            % end
+            % 
+            % % Display the final q values after RMRC
+            % finalQ = currentConfig;
+            % finalQAngles = rad2deg(finalQ);
+            % 
+            % fprintf('Final q values (after RMRC) = \n');
+            % fprintf('\n [');
+            % 
+            % fprintf('  %.5f  ', finalQ);  % Display all joint angles in a row
+            % fprintf(']\n');
+            % fprintf('\n [');
+            % 
+            % fprintf('  %.5f  ', finalQAngles);  % Display all joint angles in a row (degrees)
+            % fprintf(']\n');
+            % fprintf('\n');
+            % 
+            % % Extract the final roll, pitch, and yaw from the final transform
+            % finalRPY = tr2rpy(currentTransform);
+            % finalRPYDegrees = rad2deg(finalRPY);
+            % 
+            % fprintf('Final Roll, Pitch, Yaw (degrees) = \n');
+            % fprintf('Roll: %.5f  Pitch: %.5f  Yaw: %.5f\n\n', finalRPYDegrees(1), finalRPYDegrees(2), finalRPYDegrees(3));
+            % 
+            % % pause(1);
+            % 
+            % % Display movement complete
+            % fprintf("*********************************MOVEMENT COMPLETE*********************************\n\n");
+            % 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
 
 
@@ -475,6 +673,20 @@ classdef LabBotMovementControl
             algebraicDist = ((point(1) - center(1)) / radii(1))^2 ...
                           + ((point(2) - center(2)) / radii(2))^2 ...
                           + ((point(3) - center(3)) / radii(3))^2;
+        end
+
+        %% Helper function to return to home position
+        function returnToHome(self, robot, currentConfig, homePosition)
+            % Define a smooth trajectory back to home position
+            returnTrajectory = jtraj(currentConfig, homePosition, self.steps);
+        
+            % Animate returning to home
+            for j = 1:self.steps
+                robot.model.animate(returnTrajectory);
+                drawnow();
+                pause(0.02);
+            end
+            fprintf("Robot returned to home position due to collision.\n");
         end
     end
 end
