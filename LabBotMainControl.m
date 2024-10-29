@@ -89,13 +89,15 @@ classdef LabBotMainControl
             % Create the GUI
             obj.guiApp = GUI();  
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Set robot properties in GUI after creation
-            obj.GUI_Func.rUR3 = obj.rUR3;
-            obj.GUI_Func.rCustomBot = obj.rCustomBot;
+            % obj.GUI_Func.rUR3 = obj.rUR3;
+            % obj.GUI_Func.rCustomBot = obj.rCustomBot;
 
             % Optionally, call startupFcn if necessary to initialize further
             % obj.guiApp.startupFcn();
-                        
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
             %% Environment  
             % Initialize the environment
             disp('Initialising environment...');
@@ -103,10 +105,9 @@ classdef LabBotMainControl
             disp('Enviornment Initialised');
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Listening function not working
+            % Errors: have to comment out which one you dont want out 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Call Listening function 
-            % robot = self.rUR3;
             % robot = obj.environment.rUR3;
             % obj.GUI_Func.GUITeachUR3(robot);
 
