@@ -32,6 +32,13 @@ classdef LabBotEnvironment < handle
             grid on;  % Display a grid for better visualization of object positions
             hold on;  % Keep the plot active for additional elements
             camlight;
+
+            %% Ground Texture
+            surf([-5,-5;5,5] ...
+            ,[-5,5;-5,5] ...
+            ,[0.01,0.01;0.01,0.01] ...
+            ,'CData',imread('concrete.jpg') ...
+            ,'FaceColor','texturemap');
             
             %% Static Object Initialisation
             PlaceObject('fireExtinguisher.ply', [2,1.5,0]);
