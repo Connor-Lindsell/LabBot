@@ -143,13 +143,13 @@ classdef LabBotMainControl
             % Calling Move2Global using self
             % For UR3
             obj.movementController.Move2Global(UR3_Pos1, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
-            obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos2, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos3, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos4, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos5, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos6, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos7, obj.environment.rUR3);
+            % obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
 
             
             % For LabBot
@@ -165,14 +165,14 @@ classdef LabBotMainControl
                               };
 
             % Call MixChem with 3 chemicals and mixing location 3
-            obj.GUI_Func.MixChem( 3, chemicals2mix1, 3)
+            obj.MixChem( 3, chemicals2mix1, 3)
 
             chemicals2mix2 = {{'New Mixture', 3}, ... 
                               {'Nitrogen', 4} ...
                               };
 
             % Call MixChem with 2 chemicals and mixing location 5
-            obj.GUI_Func.MixChem(2, chemicals2mix2, 5)
+            obj.MixChem(2, chemicals2mix2, 5)
                     
         end
 
@@ -204,6 +204,73 @@ classdef LabBotMainControl
             obj.wrkspaceCalc.calculateRobotWorkspace(robot, 'CustomBot');
 
         end
+
+        %% Mix Chemical Function 
+        % Selects Chemicals and then mixes the chemicals by pouring them
+        % together
+        % 
+        % Inputs - 
+        % numOfChem: The number of chemicals to be mixed 
+        % chem2mix: The chemicals to be mixed and the corresponding test 
+        %           tube which it is stored, which are stored in an array 
+        %           of pairs eg. {'Bromine', 1}
+        % mixingLocation: Where the chemicals are to be mixed
+        
+        function MixChem(obj, numOfChem, chem2mix, mixingLocation)
+            % Define test tube locations (you could adjust this as per your environment)
+            testTubeLocation = {[0.2, -0.2, 1.7], ...
+                                [0.2, -0.1, 1.7], ...
+                                [0.2, 0, 1.7], ...
+                                [0.2, 0.1, 1.7], ...
+                                [0.2, 0.2, 1.7]};
+                            
+            % Iterate over the number of chemicals to mix
+            for i = 1:numOfChem
+                %% Retrieve Chem
+                % Extract chemical name and its location from chemicals2mix array
+                chemical = chem2mix{i}{1};  % Name of the chemical
+                locationIndex = chem2mix{i}{2};  % Index of the test tube location
+                fprintf('Picking up %s from test tube %d...\n', chemical, locationIndex);
+                fprintf('\n');
+                
+                % Move to the test tube location to pick up the chemical
+                finishPos = testTubeLocation{locationIndex};  % Test tube location 
+                
+                % Move UR3 to the test tube
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                
+                % self.GripperClose();
+                fprintf('Gripper closing to pick up %s...\n', chemical);
+                fprintf('\n');
+                
+                % Move to the mixing location
+                finishPos = testTubeLocation{mixingLocation};  % Mixing location 
+                fprintf('Moving %s to the mixing location at test tube %d...\n', chemical, mixingLocation);
+                fprintf('\n');
+                
+                % Move robot to the mixing location with the chemical
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                
+                %% Mix Chem
+                % self.PourChem(); 
+                fprintf('Pouring %s into test tube at the mixing location...\n', chemical);
+                fprintf('\n');
+                
+                %% Return Chem
+                % Move back to the original test tube location to return the tube
+                finishPos = testTubeLocation{locationIndex};  % Back to the original location
+                fprintf('Returning test tube %d to its original position...\n', locationIndex);
+                fprintf('\n');
+                
+                % Move robot back to return the test tube
+                obj.movementController.Move2Global(finishPos, obj.environment.rUR3);
+                
+                % self.GripperOpen(); 
+                fprintf('Gripper opening to release test tube %d...\n', locationIndex);
+                fprintf('\n');
+            end
+        end
+
     end
 end
  
