@@ -153,6 +153,10 @@ classdef LabBotMainControl
             % obj.GUI_Func.GUITeachUR3();
 
             % obj.GUI_Func.GUITeachCustomBot();
+
+            obj.GUI_Func.GUICartesianUR3();
+
+            % obj.GUI_Func.GUICartesianCustomBot();
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
