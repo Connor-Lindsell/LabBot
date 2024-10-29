@@ -15,12 +15,10 @@ classdef GUI_Functions
 
     % Constructor method
     methods
-        function obj = GUI_Functions()
-            % Use the provided environment object instead of creating a new one
-            % obj.movementController = LabBotMovementControl();
-            
-            % obj.rUR3 = rUR3;
-            % obj.rCustomBot = rCustomBot;
+        function obj = GUI_Functions(RobotUR3, RobotCustomBot)
+           
+            obj.rUR3 = RobotUR3;
+            obj.rCustomBot = RobotCustomBot;
 
         end
     end
@@ -39,8 +37,7 @@ classdef GUI_Functions
             % end
             % Proceed with Move2Global calls
 
-            rUR3 = obj.rUR3;
-            rCustomBot = obj.rCustomBot;
+            
                        
             
             %% Transforms
@@ -97,8 +94,9 @@ classdef GUI_Functions
                     
         end
 
-        function GUITeachUR3(obj, robot)
+        function GUITeachUR3(self)
             
+            robot = self.rUR3;
                     
             %% Setup virtual teach pendant
             pendant = GUI;   
@@ -128,8 +126,8 @@ classdef GUI_Functions
             end           
         end
 
-        function GUITeachCustomBot(obj, robot)
-            
+        function GUITeachCustomBot(obj)
+            robot = self.rCustomBot;
                     
             %% Setup virtual teach pendant
             pendant = GUI;   

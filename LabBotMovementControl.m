@@ -36,8 +36,8 @@ classdef LabBotMovementControl
             switch robot
                 case 'UR3'
                     robot = self.rUR3;
-                case 'LabBot'
-                    robot = self.rLabBot;
+                case 'CustomBot'
+                    robot = self.rCustomBot;
                 otherwise
                     error('Unknown robot specified.');
             end

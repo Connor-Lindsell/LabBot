@@ -29,11 +29,11 @@ classdef LabBotMainControl
 
             % Retrieve the Table instance from environment and pass to movement control
             obj.movementController = LabBotMovementControl(obj.environment.Table,obj.environment.rUR3,obj.environment.objects);
-            
+            obj.GUI_Func = GUI_Functions(obj.environment.rUR3,obj.environment.rCustomBot); 
 
             % Initialise Parent classes
             obj.wrkspaceCalc = LabBotCalculations();
-            obj.GUI_Func = GUI_Functions(); 
+            % obj.GUI_Func = GUI_Functions(); 
             % obj.movementController = LabBotMovementControl();
 
             % Start the E-Stop listener
@@ -82,7 +82,11 @@ classdef LabBotMainControl
                 case 5 % teach
                     % Call workspace calculation function
                     obj.GUITeach_CustomBot();
-    
+
+                % case 0 % Default initialization, no action
+                %     % Do nothing, simply return the class
+                %     disp('LabBotMainControl initialized with no action.');
+                % 
     
                 otherwise
                     % Debugging Line
@@ -140,22 +144,15 @@ classdef LabBotMainControl
             % obj.guiApp.startupFcn();
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            %% Environment  
-            % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Errors: have to comment out which one you dont want out 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Call Listening function 
-            % robot = obj.environment.rUR3;
-            % obj.GUI_Func.GUITeachUR3(robot);
+            % obj.GUI_Func.GUITeachUR3();
 
-            % robot = obj.environment.rCustomBot;
-            % obj.GUI_Func.GUITeachCustomBot(robot);
-
+            % obj.GUI_Func.GUITeachCustomBot();
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -369,15 +366,15 @@ classdef LabBotMainControl
 
         function GUITeach_UR3(obj)
             %% Call Teach Function 
-            robot = obj.environment.rUR3;
-            obj.GUI_Func.GUITeachUR3(robot);
+            % robot = obj.environment.rUR3;
+            obj.GUI_Func.GUITeachUR3();
        
         end
 
         function GUITeach_CustomBot(obj)
             %% Call Teach Function 
-            robot = obj.environment.rCustomBot;
-            obj.GUI_Func.GUITeachCustomBot(robot);
+            % robot = obj.environment.rCustomBot;
+            obj.GUI_Func.GUITeachCustomBot();
 
         end
     end
