@@ -26,7 +26,10 @@ classdef LabBotMainControl
 
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Trying to get the code to modularly work through classes
+            % % Tried to have the enviorment initalise in the constructor as
+            % well as the robot models, but for some reason i do this and
+            % get pos stops working for the robot models in demo control
+            % also trying to get the code to modularly work through classes
             % Didnt work howvere having too much trouble with robot
             % initialisation passing through gui to other classes
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,25 +50,26 @@ classdef LabBotMainControl
             % Switch based on the numeric control case provided
             switch controlCase
                 case 1 % GUI
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call GUI interface function
                     obj.GUI_InterfaceControl();
                         
                 case 2 % Demo
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call SimultaneousControl function
                     obj.DemonstrationControl();
     
                 case 3 % Calc
-                    % Debugging Line
-                    fprintf('Received controlCase: %d\n', controlCase);
-
                     % Call workspace calculation function
                     obj.WorkspaceCalculation();
+                    
+                case 4 % teach
+                    % Call workspace calculation function
+                    robot = obj.rUR3;
+                    obj.GUITeachUR3(robot);
+
+                case 5 % teach
+                    % Call workspace calculation function
+                    obj.GUITeachCustomBot();
+    
     
                 otherwise
                     % Debugging Line
@@ -89,6 +93,10 @@ classdef LabBotMainControl
             % Create the GUI
             obj.guiApp = GUI();  
 
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Attempting to send the objects to the gui app but then was
+            % getting errors saying to many inputs, couldnt find a solution
+            % so moved functions to this class from gui functions
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Set robot properties in GUI after creation
             % obj.GUI_Func.rUR3 = obj.rUR3;
@@ -151,9 +159,9 @@ classdef LabBotMainControl
             clf;
             disp('Demonstration Control Commencing')
             
-            obj.rCustomBot = CustomBot(transl(-1,0,1.5));
-            obj.rUR3 = UR3(transl(0,0,1.5));
-
+            % obj.rCustomBot = CustomBot(transl(-1,0,1.5));
+            % obj.rUR3 = UR3(transl(0,0,1.5));
+            % 
             %% Initialisation of Enviorment   
             % Initialize the environment
             disp('Initialising environment...');
@@ -190,8 +198,8 @@ classdef LabBotMainControl
             obj.movementController.Move2Global(UR3_Pos8, obj.environment.rUR3);
             
             % For LabBot
-            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rLabBot);
-            % obj.movementController.Move2Global(LabBot_End, obj.environment.rLabBot);             
+            % obj.movementController.Move2Global(LabBot_Pos1, obj.environment.rCustomBot);
+            % obj.movementController.Move2Global(LabBot_End, obj.environment.rCustomBot);             
 
             %% Mix Chemicals 
             % Not nessecary while testing optimisation 
@@ -218,11 +226,11 @@ classdef LabBotMainControl
         function WorkspaceCalculation(obj)
             disp('Workspace Calculation Comencing')
 
-            %% Initialisation of Enviorment   
-            % Initialize the environment
-            disp('Initialising environment...');
-            obj.environment.InitialiseEnvironment();  
-            disp('Enviornment Initialised');
+            % %% Initialisation of Enviorment   
+            % % Initialize the environment
+            % disp('Initialising environment...');
+            % obj.environment.InitialiseEnvironment();  
+            % disp('Enviornment Initialised');
 
             %% Workspace Calculation 
             %% UR3 Calculation
@@ -308,6 +316,71 @@ classdef LabBotMainControl
             end
         end
 
+        function GUITeachUR3(obj,robot)
+            % robot = obj.environment.rUR3;
+                    
+            %% Setup virtual teach pendant
+            pendant = GUI;   
+               
+            %% Infinite loop for teaching mode
+            while 1
+                % Read VTP values (joint angles in degrees)
+                wrench = pendant.read1;
+                
+                % Convert degrees to radians for each joint
+                q = deg2rad(wrench');
+        
+                % Display the joint angles in the command window
+                str = sprintf('--------------\n');
+                for i = 1:6
+                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
+                end
+                str = [str, sprintf('--------------\n')];
+                fprintf('%s', str);
+        
+                % Animate the robot with updated joint angles
+                robot.model.animate(q);
+        
+                % Pause briefly for real-time update (adjust as needed)
+                pause(0.05);
+
+            end           
+        end
+
+        function GUITeachCustomBot(obj)
+            robot = obj.environment.rCustomBot;
+                    
+            %% Setup virtual teach pendant
+            pendant = GUI;   
+               
+            %% Infinite loop for teaching mode
+            while 1
+                % Read VTP values (joint angles in degrees)
+                watch = pendant.read2;
+
+                q(1) = watch(1);
+                
+                % Convert degrees to radians for each joint
+                q(2:7) = deg2rad(watch(2:7)');
+        
+                disp(q);
+
+                % Display the joint angles in the command window
+                str = sprintf('--------------\n');
+                for i = 1:7
+                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
+                end
+                str = [str, sprintf('--------------\n')];
+                fprintf('%s', str);
+        
+                % Animate the robot with updated joint angles
+                robot.model.animate(q);
+        
+                % Pause briefly for real-time update (adjust as needed)
+                pause(0.05);
+
+            end           
+        end
     end
 end
  
