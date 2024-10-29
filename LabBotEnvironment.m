@@ -48,6 +48,7 @@ classdef LabBotEnvironment < handle
             % PlaceTransparentObject('TPose.ply', [0,0,1]); % Ghost
 
             PlaceObject('Enclosure.ply', [0,0,0])
+            PlaceObject('EyeWash.ply', [0,0,0]) %% https://sketchfab.com/3d-models/emergency-shower-with-eye-wash-61a536cf4e1f4995a8128863f8994e3e
             PlaceObject('LoudSpeaker.ply', [0,0,0]) %% https://free3d.com/3d-model/speaker-99850.html
             PlaceObject('SignalTower.ply', [0,0,0]) %% https://grabcad.com/library/signal-tower-1
             PlaceTransparentObject('Window.ply',[0,0,0]);
