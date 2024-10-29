@@ -23,9 +23,9 @@ classdef LabBotEnvironment < handle
             camlight;
             
             %% Static Object Initialisation
-            PlaceObject('fireExtinguisher.ply', [2,2,0]);
-            PlaceObject('TPose.ply', [0,1.9,0]);
-            PlaceObject('BMan.ply', [0,1.5,0])
+            % PlaceObject('fireExtinguisher.ply', [2,2,0]);
+            % PlaceObject('TPose.ply', [0,1.9,0]);
+            % PlaceObject('BMan.ply', [0,1.5,0])
 
             %% Object Initialiastion         
             self.Table = Table();

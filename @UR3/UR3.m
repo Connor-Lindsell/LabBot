@@ -46,5 +46,13 @@ classdef UR3 < RobotBaseClass
              
             self.model = SerialLink(link,'name',self.name);
         end      
+
+        %% InitializeRobot
+        function initializeRobot(self, baseTransform)
+            % Function to initialize or reinitialize the robot's base transform
+            self.model.base = baseTransform;
+            disp('UR3 Robot base initialized with new transform.');
+        end
+
     end
 end

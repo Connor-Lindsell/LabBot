@@ -3,12 +3,15 @@ classdef LabBotMovementControl
     properties 
         steps = 100;
 
-        environment
+        rUR3
+        rCustomBot
     end
 
     methods 
-        function obj = LabBotMovementControl
-            obj.environment = LabBotEnvironment();
+        function obj = LabBotMovementControl ()
+            % obj.rUR3 = rUR3;
+            % obj.rCustomBot = rCustomBot;
+            
         end
     end
 
