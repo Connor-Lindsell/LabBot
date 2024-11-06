@@ -110,12 +110,12 @@ classdef GUI_Functions
                 q = deg2rad(wrench');
         
                 % Display the joint angles in the command window
-                str = sprintf('--------------\n');
-                for i = 1:6
-                    str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
-                end
-                str = [str, sprintf('--------------\n')];
-                fprintf('%s', str);
+                % str = sprintf('--------------\n');
+                % for i = 1:6
+                %     str = [str, sprintf('Joint %d: %01.3f rad\n', i, q(i))];
+                % end
+                % str = [str, sprintf('--------------\n')];
+                % fprintf('%s', str);
         
                 % Animate the robot with updated joint angles
                 robot.model.animate(q);
@@ -178,16 +178,16 @@ classdef GUI_Functions
                 rench = pendant.read3;
         
                 % Print buttons/axes info to command window
-                str = sprintf('--------------\n');
-                str = [str sprintf('Force  X:%01.3f\n',rench(1))];
-                str = [str sprintf('Force  Y:%01.3f\n',rench(2))];
-                str = [str sprintf('Force  Z:%01.3f\n',rench(3))];
-                str = [str sprintf('Torque X:%01.3f\n',rench(4))];
-                str = [str sprintf('Torque Y:%01.3f\n',rench(5))];
-                str = [str sprintf('Torque Z:%01.3f\n',rench(6))];
-                str = [str sprintf('--------------\n')];
-                fprintf('%s',str);
-                pause(0.05);  
+                % str = sprintf('--------------\n');
+                % str = [str sprintf('Force  X:%01.3f\n',rench(1))];
+                % str = [str sprintf('Force  Y:%01.3f\n',rench(2))];
+                % str = [str sprintf('Force  Z:%01.3f\n',rench(3))];
+                % str = [str sprintf('Torque X:%01.3f\n',rench(4))];
+                % str = [str sprintf('Torque Y:%01.3f\n',rench(5))];
+                % str = [str sprintf('Torque Z:%01.3f\n',rench(6))];
+                % str = [str sprintf('--------------\n')];
+                % fprintf('%s',str);
+                % pause(0.05);  
                     
                 % Extract force and torque values
                 fx = rench(1);

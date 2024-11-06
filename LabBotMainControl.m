@@ -144,7 +144,7 @@ classdef LabBotMainControl
                 % 
                 % GUI_Case = pendant.read5;
                 
-                GUI_Case = 4;
+                GUI_Case = 1;
 
                 disp(GUI_Case);
 
