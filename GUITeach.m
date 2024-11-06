@@ -37,8 +37,6 @@ function GUITeach()
 
         % Pause briefly for real-time update (adjust as needed)
         pause(0.05);
-
-    %%
-    
+    end
 
 end
