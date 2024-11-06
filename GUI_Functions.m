@@ -126,7 +126,7 @@ classdef GUI_Functions
             end           
         end
 
-        function GUITeachCustomBot(obj)
+        function GUITeachCustomBot(self)
             robot = self.rCustomBot;
                     
             %% Setup virtual teach pendant
@@ -161,123 +161,128 @@ classdef GUI_Functions
             end           
         end
 
-        function GUICartesianUR3(obj)
+        function GUICartesianUR3(self)
+            
             robot = self.rUR3;
-            
-            %% Setup virtual teach pendant
-            pendant = TestTeach;
-            
-            % Initialize initial robot configuration 'q'
-            q = [0 0 0 0 0 0];
-            
-            % Configurable duration and time step
-            duration = 300;  % seconds
-            dt = 0.5;        % seconds
-        
-            % Define admittance and DLS gain parameters
-            Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);
-            lambda = 0.1;
-        
-            %% Infinite loop for teaching mode with user-controlled break
-            while true
-                % Read virtual teach pendant values
-                rench = pendant.read;
                 
-                % Simulation time
-                tic;
-                for n = 1:(duration/dt)
-                    % Combined force-torque vector
-                    f = [rench(1:3); rench(4:6)];
+            %% Setup virtual teach pendant
+            pendant = GUI;  
         
-                    % Print pendant values to command window
-                    fprintf('Force X:%01.3f Y:%01.3f Z:%01.3f | Torque X:%01.3f Y:%01.3f Z:%01.3f\n', ...
-                        rench(1), rench(2), rench(3), rench(4), rench(5), rench(6));
+            q = [0 -pi/4 pi/2 -pi/4 0 0];
+            qn = q;
+            robot.model.animate(qn);
+        
+            %% Infinite loop for teaching mode
+            while 1
+                % Read VTP values
+                rench = pendant.read3;
+        
+                % Print buttons/axes info to command window
+                str = sprintf('--------------\n');
+                str = [str sprintf('Force  X:%01.3f\n',rench(1))];
+                str = [str sprintf('Force  Y:%01.3f\n',rench(2))];
+                str = [str sprintf('Force  Z:%01.3f\n',rench(3))];
+                str = [str sprintf('Torque X:%01.3f\n',rench(4))];
+                str = [str sprintf('Torque Y:%01.3f\n',rench(5))];
+                str = [str sprintf('Torque Z:%01.3f\n',rench(6))];
+                str = [str sprintf('--------------\n')];
+                fprintf('%s',str);
+                pause(0.05);  
                     
-                    % Convert force measurement to end-effector velocity command
-                    dx = Ka * f;
+                % Extract force and torque values
+                fx = rench(1);
+                fy = rench(2);
+                fz = rench(3);
+                tx = rench(4);
+                ty = rench(5);
+                tz = rench(6);
+                
+                dt = 0.1;
         
-                    % Use DLS J inverse to calculate joint velocity
-                    J = robot.model.jacobe(q);
-                    Jinv_dls = inv(J' * J + lambda^2 * eye(6)) * J';
-                    dq = Jinv_dls * dx;
+                f = [fx;fy;fz;tx;ty;tz]; % combined force-torque vector (wwrench)
         
-                    % Step robot joint angles
-                    q = q + dq' * dt;
+                % 2 - use simple admittance scheme to convert force measurement into
+                % velocity command
+                Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]); % admittance gain matrix  
+                dx = Ka*f; % convert wwrench into end-effector velocity command
         
-                    % Animate the robot
-                    robot.model.animate(q);
-                    drawnow();
+                % 2 - use DLS J inverse to calculate joint velocity
+                J = robot.model.jacobe(q);
         
-                    % Timing control
-                    if toc > dt * n
-                        warning('Loop %i took too long - consider increasing dt.', n);
-                    end
+                lambda = 0.001;
+                Jinv_dls = inv((J'*J)+lambda^2*eye(6))*J';
+                dq = Jinv_dls*dx;
         
-                    while toc < dt * n
-                        % Waiting for the loop time to elapse
-                    end
-                end
+                % 3 - apply joint velocity to step robot joint angles
+                q = q + dq'*dt;
+        
+        
+                % Update plot
+                robot.model.animate(q);
+        
             end
-        end 
+        end
 
-        function GUICartesianCustomBot(obj)
+        function GUICartesianCustomBot(self)
             robot = self.rCustomBot;
-            
+                            
             %% Setup virtual teach pendant
-            pendant = TestTeach;
-            
-            % Initialize initial robot configuration 'q'
-            q = [0 0 0 0 0 0];
-            
-            % Configurable duration and time step
-            duration = 300;  % seconds
-            dt = 0.5;        % seconds
+            pendant = GUI;   
         
-            % Define admittance and DLS gain parameters
-            Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]);
-            lambda = 0.1;
+            q = [0 0 0 0 0 0 0];
+            qn = q;
+            robot.model.animate(qn);
         
-            %% Infinite loop for teaching mode with user-controlled break
-            while true
-                % Read virtual teach pendant values
-                rench = pendant.read;
-                
-                % Simulation time
-                tic;
-                for n = 1:(duration/dt)
-                    % Combined force-torque vector
-                    f = [rench(1:3); rench(4:6)];
+            %% Infinite loop for teaching mode
+            while 1
+                % Read VTP values
+                atch = pendant.read4;
         
-                    % Print pendant values to command window
-                    fprintf('Force X:%01.3f Y:%01.3f Z:%01.3f | Torque X:%01.3f Y:%01.3f Z:%01.3f\n', ...
-                        rench(1), rench(2), rench(3), rench(4), rench(5), rench(6));
+                % Print buttons/axes info to command window
+                str = sprintf('--------------\n');
+                str = [str sprintf('Force  X:%01.3f\n',atch(1))];
+                str = [str sprintf('Force  Y:%01.3f\n',atch(2))];
+                str = [str sprintf('Force  Z:%01.3f\n',atch(3))];
+                str = [str sprintf('Torque X:%01.3f\n',atch(4))];
+                str = [str sprintf('Torque Y:%01.3f\n',atch(5))];
+                str = [str sprintf('Torque Z:%01.3f\n',atch(6))];
+                str = [str sprintf('--------------\n')];
+                fprintf('%s',str);
+                pause(0.05);  
                     
-                    % Convert force measurement to end-effector velocity command
-                    dx = Ka * f;
+                % Extract force and torque values
+                fx = atch(1);
+                fy = atch(2);
+                fz = atch(3);
+                tx = atch(4);
+                ty = atch(5);
+                tz = atch(6);
+                
+                dt = 0.1;
         
-                    % Use DLS J inverse to calculate joint velocity
-                    J = robot.model.jacobe(q);
-                    Jinv_dls = inv(J' * J + lambda^2 * eye(6)) * J';
-                    dq = Jinv_dls * dx;
+                f = [fx;fy;fz;tx;ty;tz]; % combined force-torque vector (wwrench)
         
-                    % Step robot joint angles
-                    q = q + dq' * dt;
+                % 2 - use simple admittance scheme to convert force measurement into
+                % velocity command
+                Ka = diag([0.3 0.3 0.3 0.5 0.5 0.5]); % admittance gain matrix  
+                dx = Ka*f; % convert wwrench into end-effector velocity command
         
-                    % Animate the robot
-                    robot.model.animate(q);
-                    drawnow();
+                % 2 - use DLS J inverse to calculate joint velocity
+                J = robot.model.jacobe(q);
         
-                    % Timing control
-                    if toc > dt * n
-                        warning('Loop %i took too long - consider increasing dt.', n);
-                    end
+                lambda = 0.001;
+                Jinv_dls = inv((J'*J)+lambda^2*eye(7))*J';
+                dq = Jinv_dls*dx;
         
-                    while toc < dt * n
-                        % Waiting for the loop time to elapse
-                    end
-                end
+                % 3 - apply joint velocity to step robot joint angles
+                q = q + dq'*dt;
+        
+        
+                % Update plot
+                robot.model.animate(q);
+        
             end
-        end 
+        end
 
         %%
         % Enable control method
