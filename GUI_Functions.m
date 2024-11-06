@@ -223,15 +223,13 @@ classdef GUI_Functions
             end
         end
 
-        function GUICartesianCustomBot(obj)
+        function GUICartesianCustomBot(self)
             robot = self.rCustomBot;
-            
-            robot = self.rUR3;
-                
+                            
             %% Setup virtual teach pendant
             pendant = GUI;   
         
-            q = [0 -pi/4 pi/2 -pi/4 0 0];
+            q = [0 0 0 0 0 0 0];
             qn = q;
             robot.model.animate(qn);
         
@@ -273,7 +271,7 @@ classdef GUI_Functions
                 J = robot.model.jacobe(q);
         
                 lambda = 0.001;
-                Jinv_dls = inv((J'*J)+lambda^2*eye(6))*J';
+                Jinv_dls = inv((J'*J)+lambda^2*eye(7))*J';
                 dq = Jinv_dls*dx;
         
                 % 3 - apply joint velocity to step robot joint angles
