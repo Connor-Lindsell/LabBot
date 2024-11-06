@@ -138,6 +138,33 @@ classdef LabBotMainControl
             % Create the GUI
             obj.guiApp = GUI();  
 
+            while 1
+
+                % pendant = GUI;
+                % 
+                % GUI_Case = pendant.read5;
+                
+                GUI_Case = 3;
+
+                disp(GUI_Case);
+
+                switch GUI_Case
+                    case 1 
+                        obj.GUI_Func.GUITeachUR3();
+                            
+                    case 2
+                        obj.GUI_Func.GUITeachCustomBot();
+        
+                    case 3 
+                        obj.GUI_Func.GUICartesianUR3();
+                        
+                    case 4 
+                        obj.GUI_Func.GUICartesianCustomBot();   
+                    case 5
+                        % nothing to be called
+                end
+
+
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Attempting to send the objects to the gui app but then was
             % getting errors saying to many inputs, couldnt find a solution
@@ -182,7 +209,7 @@ classdef LabBotMainControl
             % futureCustomBot = parfeval(pool, @obj.GUI_Func.GUITeachCustomBot, 0, robotCustomBot);
             % 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+            
             %% Wait for Gui          
             % Wait for the GUI to be closed
             uiwait(obj.guiApp.UIFigure);
@@ -195,6 +222,7 @@ classdef LabBotMainControl
             % cancel(futureCustomBot);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
+            end
         end                
 
         %% Demonstration of Robot Control
