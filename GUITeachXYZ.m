@@ -3,7 +3,7 @@ function GUITeachXYZ()
     robot = UR3;
 
     %% Scene Initialisation
-    axis([-2 2 -2 2 0 4]);  
+    axis([-1 1 -1 1 0 1]);  
     xlabel('X-axis');  
     ylabel('Y-axis');  
     zlabel('Z-axis');  
@@ -13,11 +13,27 @@ function GUITeachXYZ()
     %% Setup virtual teach pendant
     pendant = TestTeachXYZ;   
 
+    q = [0 -pi/4 pi/2 -pi/4 0 0];
+    qn = q;
+    robot.model.animate(qn);
+
     %% Infinite loop for teaching mode
     while 1
         % Read VTP values
         wrench = pendant.read;
 
+        % Print buttons/axes info to command window
+        str = sprintf('--------------\n');
+        str = [str sprintf('Force  X:%01.3f\n',wrench(1))];
+        str = [str sprintf('Force  Y:%01.3f\n',wrench(2))];
+        str = [str sprintf('Force  Z:%01.3f\n',wrench(3))];
+        str = [str sprintf('Torque X:%01.3f\n',wrench(4))];
+        str = [str sprintf('Torque Y:%01.3f\n',wrench(5))];
+        str = [str sprintf('Torque Z:%01.3f\n',wrench(6))];
+        str = [str sprintf('--------------\n')];
+        fprintf('%s',str);
+        pause(0.05);  
+            
         % Extract force and torque values
         fx = wrench(1);
         fy = wrench(2);
@@ -25,21 +41,22 @@ function GUITeachXYZ()
         tx = wrench(4);
         ty = wrench(5);
         tz = wrench(6);
+        
 
-        % Print force and torque values to the command window
-        str = sprintf('--------------\n');
-        str = [str sprintf('Force  X:%01.3f\n', fx)];
-        str = [str sprintf('Force  Y:%01.3f\n', fy)];
-        str = [str sprintf('Force  Z:%01.3f\n', fz)];
-        str = [str sprintf('Torque X:%01.3f\n', tx)];
-        str = [str sprintf('Torque Y:%01.3f\n', ty)];
-        str = [str sprintf('Torque Z:%01.3f\n', tz)];
-        str = [str sprintf('--------------\n')];
-        fprintf('%s', str);
+        % % Print force and torque values to the command window
+        % str = sprintf('--------------\n');
+        % str = [str sprintf('Force  X:%01.3f\n', fx)];
+        % str = [str sprintf('Force  Y:%01.3f\n', fy)];
+        % str = [str sprintf('Force  Z:%01.3f\n', fz)];
+        % str = [str sprintf('Torque X:%01.3f\n', tx)];
+        % str = [str sprintf('Torque Y:%01.3f\n', ty)];
+        % str = [str sprintf('Torque Z:%01.3f\n', tz)];
+        % str = [str sprintf('--------------\n')];
+        % fprintf('%s', str);
 
-        q = [0 -pi 0 0 0 0];
+        
 
-        dt = 0.5;
+        dt = 0.1;
 
         f = [fx;fy;fz;tx;ty;tz]; % combined force-torque vector (wwrench)
 
@@ -51,7 +68,7 @@ function GUITeachXYZ()
         % 2 - use DLS J inverse to calculate joint velocity
         J = robot.model.jacobe(q);
 
-        lambda = 0.1;
+        lambda = 0.001;
         Jinv_dls = inv((J'*J)+lambda^2*eye(6))*J';
         dq = Jinv_dls*dx;
 
