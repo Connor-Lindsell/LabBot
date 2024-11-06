@@ -7,6 +7,7 @@ classdef LabBotMovementControl
         rCustomBot
         table
         objects
+        beaker = Beaker(transl(1,0,0.8))
     end
 
     methods 
@@ -113,6 +114,10 @@ classdef LabBotMovementControl
                 end
 
                 robot.model.animate(qMatrix(i, :));
+%Beaker Update
+                % self.beaker.model.base = robot.model.fkine(qMatrix(i,:)).T * trotx(pi/2) * troty(-pi/2) * transl(0,0.1,-0.1);
+                % self.beaker.model.animate(qMatrix(i, :));
+
                 drawnow();
                 pause(0.02);  % Adjust pause for speed of animation
             end
@@ -226,6 +231,8 @@ classdef LabBotMovementControl
 
                 % Animate the robot to the new configuration
                 robot.model.animate(currentConfig);
+                % self.beaker.model.base = robot.model.fkine(currentConfig).T * trotx(pi/2) * troty(-pi/2) * transl(0,0.1,-0.1);
+                % self.beaker.model.animate(currentConfig);
                 drawnow();
                 pause(deltaT);
 

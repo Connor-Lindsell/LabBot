@@ -10,6 +10,8 @@ classdef Beaker < RobotBaseClass
                 if nargin < 1
                     baseTr = transl(0,0,0);
                 end
+                
+                
                 self.CreateModel()
            
 
@@ -20,8 +22,13 @@ classdef Beaker < RobotBaseClass
             end
 
             function CreateModel(self)
-                L(1) = Link('d', -10,'a',0,'alpha',pi/2,'qlim',[deg2rad(-270) deg2rad(270)], 'offset',0);
+                L(1) = Link('d', -1,'a',0,'alpha',pi/2,'qlim',[deg2rad(-270) deg2rad(270)], 'offset',0);
                 self.model = SerialLink(L,'name',self.name);
+            end
+
+            function AttachObj(self, endEffectorTr)
+                self.beakerModel.base = endEffectorTr * self.baseTr;
+                drawnow();
             end
 
         end

@@ -42,6 +42,7 @@ classdef LabBotEnvironment < handle
             
             %% Static Object Initialisation
             PlaceObject('fireExtinguisher.ply', [2,1.5,0]);
+            PlaceObject('fireExtinguisher.ply', [2,1,0]);
             PlaceObject('emergencyStopWallMounted.ply', [-0.5,1.2,0.5])
             PlaceObject('TPose.ply', [0.2,1.9,0]); %% https://creazilla.com/media/3d-model/1795171/scientist
             PlaceObject('BMan.ply', [0,1.5,0])

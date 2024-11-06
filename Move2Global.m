@@ -4,6 +4,8 @@ function Move2Global(self, startTr, finishTr, robot)
     startTr = [0.3,0.3,0.3];
     finishTr = [0.35,-0.25,0.1];
     robot = UR3;
+    beaker = Beaker();
+
 
     %% Inverse Kinematics
     % Roll Pitch Yaw
@@ -75,7 +77,12 @@ function Move2Global(self, startTr, finishTr, robot)
     % Animate the robot through the combined trajectory
     for i = 1:size(qMatrixTotal, 1)
         robot.model.animate(qMatrixTotal(i, :));
+        % 
+        % 
+        % beaker.model.base = robot.model.fkine(qMatrixTotal(i,:)).T * trotx(pi/2) * troty(-pi/2) * transl(0,0.1,-0.1);
+        % beaker.model.animate(qMatrixTotal(i, :));
         drawnow();
+
         pause(0.05);
     end
     hold on
